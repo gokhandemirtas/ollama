@@ -1,1 +1,14 @@
-/* You can add global styles to this file, and also import other style files */
+:root {
+  color-scheme: only light !important;
+}
+
+@media (forced-colors: active) {
+  :root {
+      color-scheme: light;
+  }
+}
+
+body {
+  background: black;
+  color: white;
+}
