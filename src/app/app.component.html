@@ -2,9 +2,11 @@
   <mat-card appearance="outlined">
     <mat-card-content>
       <aside class="response-container">
-        @for(response of responses; track response) {
+        @for(message of messages(); track message) {
           <p class="mat-body-1">
-            <span class="timestamp-container" [attr.title]="response.duration">{{ response.timestamp | date: 'short' }}</span> {{ response.message }}
+            <span class="timestamp-container" [attr.title]="message.duration">
+              {{ message.timestamp | date: 'short' }}
+            </span> {{ message.text }}
           </p>
         }
       </aside>
@@ -18,7 +20,7 @@
       { <mat-progress-bar mode="indeterminate"></mat-progress-bar> }
     </mat-card-content>
     <mat-card-actions align="end">
-      <button (click)="query()" mat-flat-button color="warn" [disabled]="promptForm.invalid || isWaiting()">ASK</button>
+      <button (click)="submit()" mat-flat-button color="warn" [disabled]="promptForm.invalid || isWaiting()">ASK</button>
     </mat-card-actions>
   </mat-card>
 </section>

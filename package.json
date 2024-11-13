@@ -4,6 +4,9 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
+    "lama:serve": "ollama serve",
+    "lama:run": "ollama run llama3.2",
+    "chroma": "chroma run --path ./getting-started ",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test"
@@ -20,6 +23,10 @@
     "@angular/platform-browser": "^18.2.0",
     "@angular/platform-browser-dynamic": "^18.2.0",
     "@angular/router": "^18.2.0",
+    "@xenova/transformers": "^2.17.2",
+    "chromadb": "^1.9.2",
+    "chromadb-default-embed": "^2.13.2",
+    "lodash-es": "^4.17.21",
     "ollama": "^0.5.9",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
@@ -29,6 +36,7 @@
     "@angular-devkit/build-angular": "^18.2.10",
     "@angular/cli": "^18.2.10",
     "@angular/compiler-cli": "^18.2.0",
+    "@types/lodash-es": "^4.17.12",
     "typescript": "~5.5.2"
   }
 }
