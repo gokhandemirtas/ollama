@@ -10,6 +10,7 @@ import { CommonModule } from '@angular/common';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { ChromaClient, OllamaEmbeddingFunction } from 'chromadb';
 import { uniqueId } from 'lodash-es';
+import { PromptTemplate } from "@langchain/core/prompts";
 
 interface Message {
   text: string;
@@ -117,6 +118,15 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   async query(query: string): Promise<ChatResponse> {
+    /* const questionTemplate = PromptTemplate.fromTemplate(`
+      You are a fruit expert. Answer the below question using the context.
+      Strictly use the context and answer in crisp and point to point.
+      <context>
+      {context}
+      </context>
+
+      question: {query}
+    `) */
     return this.llama.chat({
       model: this.model,
       messages: [{ role: 'user', content: `${query}` }]
