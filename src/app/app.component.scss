@@ -8,6 +8,9 @@
 }
 
 .response-container {
+  max-height: 80vh;
+  overflow-y: auto;
+  
   p {
     font-size: 11px;
     line-height: 13px;

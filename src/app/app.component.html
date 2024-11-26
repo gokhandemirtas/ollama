@@ -20,6 +20,8 @@
       { <mat-progress-bar mode="indeterminate"></mat-progress-bar> }
     </mat-card-content>
     <mat-card-actions align="end">
+      <button (click)="service.resettah()" mat-stroked-button color="warn" [disabled]="isWaiting()">Reset</button>
+      <button (click)="service.loadDocs()" mat-stroked-button color="warn">Load docs</button>
       <button (click)="submit()" mat-flat-button color="warn" [disabled]="promptForm.invalid || isWaiting()">ASK</button>
     </mat-card-actions>
   </mat-card>

@@ -1,6 +1,6 @@
 import { Component, OnDestroy, OnInit, signal } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { ChatResponse, Ollama } from 'ollama/browser';
+import { ChatResponse, GenerateResponse, Ollama } from 'ollama/browser';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -11,6 +11,7 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { ChromaClient, OllamaEmbeddingFunction } from 'chromadb';
 import { uniqueId } from 'lodash-es';
 import { PromptTemplate } from "@langchain/core/prompts";
+import { LlamaService } from './llama.service';
 
 interface Message {
   text: string;
@@ -35,47 +36,21 @@ interface Message {
   styleUrl: './app.component.scss'
 })
 export class AppComponent implements OnInit, OnDestroy {
-  title = 'ollama';
+  constructor(public service: LlamaService) {}
 
   promptForm = new FormGroup({
     query: new FormControl('', [Validators.required])
-  })
-
-  model = 'llama3.2';
-
-  llama!: Ollama;
-
-  collection!: any;
-
-  llamaUrl = 'http://127.0.0.1:11434';
+  });
 
   isWaiting = signal(false);
-
   messages = signal<Array<Message>>([]);
 
-  constructor() {}
-
   ngOnInit(): void {
-    this.llama = new Ollama({ host: this.llamaUrl });
-    this.createCollection();
+    this.service.setup();
   }
-
-  async createCollection() {
-    const chroma = new ChromaClient();
-    const embeddingFunction = new OllamaEmbeddingFunction({
-      url: `${this.llamaUrl}/api/embeddings`,
-      model: 'nomic-embed-text'
-    });
-    const collection = await chroma.getOrCreateCollection({
-      name: 'remember',
-      embeddingFunction
-    });
-    this.collection = collection;
-  }
-
 
   ngOnDestroy(): void {
-    this.llama.abort();
+    this.service.llama.abort();
   }
 
   updateReplies(part: Message) {
@@ -89,47 +64,15 @@ export class AppComponent implements OnInit, OnDestroy {
     const query = `${queryInput.value}`;
     this.isWaiting.set(true);
     queryInput.disable();
-    const response = await this.query(query);
-    this.updateReplies({
-      timestamp: new Date(response.created_at).toISOString(),
-      duration: response.total_duration / 1000 / 1000 / 1000,
-      text: response.message.content
-    });
+    const response = await this.service.query(query);
     queryInput?.setValue(null);
     queryInput?.enable();
     this.isWaiting.set(false);
-    this.updateCollection(response.message.content).then(() => {}, (err) => {
-      console.log(err)
-    });
-
-    this.collection.query({
-      queryTexts: query,
-      nResults: 5,
-    }).then((response: any) => {
-      console.log(response)
+    this.updateReplies({
+      timestamp: new Date(response.created_at).toISOString(),
+      duration: response.total_duration / 1000 / 1000 / 1000,
+      text: response.response
     });
   }
 
-  async updateCollection(content: string){
-    return await this.collection.upsert({
-      documents: [content],
-      ids: [uniqueId()],
-    });
-  }
-
-  async query(query: string): Promise<ChatResponse> {
-    /* const questionTemplate = PromptTemplate.fromTemplate(`
-      You are a fruit expert. Answer the below question using the context.
-      Strictly use the context and answer in crisp and point to point.
-      <context>
-      {context}
-      </context>
-
-      question: {query}
-    `) */
-    return this.llama.chat({
-      model: this.model,
-      messages: [{ role: 'user', content: `${query}` }]
-    });
-  }
 }
