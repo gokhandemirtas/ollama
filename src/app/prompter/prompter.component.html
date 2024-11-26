@@ -1,0 +1,28 @@
+<section class="query-container">
+  <mat-card appearance="outlined">
+    <mat-card-content>
+      <aside class="response-container">
+        @for(message of messages(); track message) {
+          <p class="mat-body-1">
+            <span class="timestamp-container" [attr.title]="message.duration">
+              {{ message.timestamp | date: 'short' }}
+            </span> {{ message.text }}
+          </p>
+        }
+      </aside>
+      <form [formGroup]="promptForm">
+        <mat-form-field>
+          <mat-label>Ask me something</mat-label>
+          <textarea matInput formControlName="query"></textarea>
+        </mat-form-field>
+      </form>
+      @if(isWaiting())
+      { <mat-progress-bar mode="indeterminate"></mat-progress-bar> }
+    </mat-card-content>
+    <mat-card-actions align="end">
+      <button (click)="submit()" mat-flat-button color="warn" [disabled]="promptForm.invalid || isWaiting()">ASK</button>
+    </mat-card-actions>
+  </mat-card>
+</section>
+  
+  

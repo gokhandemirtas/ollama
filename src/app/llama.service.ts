@@ -1,24 +1,24 @@
-import { Injectable } from '@angular/core';
-import { GenerateResponse, Ollama } from 'ollama/browser';
-import { ChromaClient, OllamaEmbeddingFunction } from 'chromadb';
-import { uniqueId } from 'lodash-es';
 import { HttpClient } from '@angular/common/http';
+import { Inject, Injectable } from '@angular/core';
+import { ChromaClient, CollectionParams, OllamaEmbeddingFunction } from 'chromadb';
+import { uniqueId } from 'lodash-es';
+import { GenerateResponse, Ollama } from 'ollama/browser';
 import { take } from 'rxjs';
+import { Environment } from '../environment/environment.model';
+import { ENVIRONMENT } from '../environment/environment.token';
 
 @Injectable({
   providedIn: 'root',
 })
 export class LlamaService {
-  model = 'llama3.2';
-  collection!: any;
-  llamaUrl = 'http://127.0.0.1:11434';
-  chromaUrl = 'http://localhost:8000';
-  llama: Ollama = new Ollama({ host: this.llamaUrl });
-  chromaClient: ChromaClient = new ChromaClient({ path: this.chromaUrl });
-
-  constructor(public http: HttpClient) {
-
+  constructor(public http: HttpClient, @Inject(ENVIRONMENT) public environment: Environment) {
+    this.chromaClient = new ChromaClient({ path: this.environment.chromaUrl });
+    this.llamaClient = new Ollama({ host: this.environment.ollamaUrl });
   }
+
+  collection!: any;
+  llamaClient!: Ollama;
+  chromaClient!: ChromaClient;
 
   loadDocs() {
     this.http.get<{
@@ -26,7 +26,7 @@ export class LlamaService {
         metadata: any,
         pageContent: string,
       }>
-    }>('http://localhost:3000/loaddocs').pipe(take(1)).subscribe(({ response }) => {
+    }>(`${this.environment.apiUrl}/loaddocs`).pipe(take(1)).subscribe(({ response }) => {
       response.map((doc) => {
         this.updateCollection(doc.pageContent, 'userprompt')
       });
@@ -35,13 +35,13 @@ export class LlamaService {
 
   async setup() {
     const embeddingFunction = new OllamaEmbeddingFunction({
-      url: `${this.llamaUrl}/api/embeddings`,
-      model: 'nomic-embed-text'
+      url: `${this.environment.ollamaUrl}/api/embeddings`,
+      model: this.environment.embedderModel
     });
     this.chromaClient.heartbeat();
 
     this.chromaClient.getOrCreateCollection({
-      name: 'remember',
+      name: this.environment.defaultCollection,
       embeddingFunction
     }).then((collection: any) => {
       this.collection = collection;
@@ -63,13 +63,13 @@ export class LlamaService {
         nResults: 30,
       }).then((results: any) => {
         console.log(results);
-        this.llama.generate(
+        this.llamaClient.generate(
           {
-            model: this.model,
+            model: this.environment.llmModel,
             prompt: `Only using this data: ${results.documents.join()}. Respond to this prompt: ${query}`
           }
         ).then((response) => {
-          this.updateCollection(response.response, 'userprompt').then(() => {}, (err: any) => {
+          this.updateCollection(response.response, this.environment.defaultCollection).then(() => {}, (err: any) => {
             console.log(err)
           });
           resolve(response);

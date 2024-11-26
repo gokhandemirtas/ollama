@@ -1,35 +1,5 @@
-.query-container {
-  width: calc(50vw);
-  margin: 32px auto;
-
-  .mat-mdc-form-field {
-    display: block;
+.mat-mdc-card-actions {
+  .mat-mdc-button {
+    margin-left: 8px !important;
   }
-}
-
-.response-container {
-  max-height: 80vh;
-  overflow-y: auto;
-  
-  p {
-    font-size: 11px;
-    line-height: 13px;
-    padding: 0;
-    margin: 0 0 8px 0;
-    padding: 0 0 8px 0;
-    border-bottom: 1px dotted rgba(132, 52, 109, 0.398);
-
-    &:last-child {
-      border: none;
-    }
-  }
-
-  .timestamp-container {
-    border-radius: 2px;
-    font-size: 11px;
-    background: rgba(132, 52, 109, 0.398);
-    padding: 2px 4px;
-    margin: 0 8px 0 0;
-  }
-
 }
