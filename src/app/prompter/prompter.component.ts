@@ -8,6 +8,7 @@ import { LlamaService } from '../llama.service';
 import { Message } from '../constants/message';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
+import { take } from 'rxjs';
 
 @Component({
     selector: 'app-root',
@@ -35,12 +36,11 @@ export class PrompterComponent {
   messages = signal<Array<Message>>([]);
 
   ngOnInit(): void {
-    this.service.setup();
+
   }
 
   ngOnDestroy(): void {
-    this.service.llamaClient.abort();
-    this.service.chromaClient.init();
+
   }
 
   updateReplies(part: Message) {
@@ -54,14 +54,18 @@ export class PrompterComponent {
     const query = `${queryInput.value}`;
     this.isWaiting.set(true);
     queryInput.disable();
-    const response = await this.service.query(query);
-    queryInput?.setValue(null);
-    queryInput?.enable();
-    this.isWaiting.set(false);
-    this.updateReplies({
-      timestamp: new Date(response.created_at).toISOString(),
-      duration: response.total_duration / 1000 / 1000 / 1000,
-      text: response.response
+    this.service.query(query).pipe(take(1)).subscribe((response: any) => {
+      console.log(response);
+      this.isWaiting.set(false);
+      queryInput?.setValue(null);
+      queryInput?.enable();
+      this.updateReplies({
+        timestamp: new Date(response.created_at).toISOString(),
+        duration: response.eval_count / response.eval_duration * 10^9,
+        text: response.response
+      });
+    }, () => {
+      this.isWaiting.set(false);
     });
   }
 }

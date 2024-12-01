@@ -1,6 +1,6 @@
 import { Routes } from '@angular/router';
 import { PrompterComponent } from './prompter/prompter.component';
-import { ManagementComponent } from './management.ts/management.component';
+import { ManagementComponent } from './management/management.component';
 
 export const routes: Routes = [
   {
