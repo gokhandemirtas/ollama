@@ -1,7 +1,7 @@
 <section class="card-container">
-  @if(isWaiting())
-  { <mat-progress-bar mode="indeterminate"></mat-progress-bar> }
   <mat-card appearance="outlined">
+    @if(isWaiting())
+    { <mat-progress-bar mode="indeterminate"></mat-progress-bar> }
     <mat-card-header>
       <mat-card-title>
         Collections
@@ -22,9 +22,9 @@
      </mat-list>
     </mat-card-content>
     <mat-card-actions align="end">
-      <button mat-stroked-button color="warn" [disabled]="isWaiting()">Reset store</button>
+      <button (click)="reset()" mat-stroked-button color="warn" [disabled]="isWaiting()">Reset store</button>
       <button (click)="fetchCollections()" mat-stroked-button color="primary">Get collections</button>
-      <button  mat-stroked-button color="warn">Load from bucket</button>
+      <button (click)="loadDocs()" mat-stroked-button color="warn">Load from bucket</button>
     </mat-card-actions>
   </mat-card>
 </section>

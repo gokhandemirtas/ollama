@@ -25,4 +25,12 @@ export class LlamaService {
     return this.http.delete(`${this.environment.apiUrl}/collection/${name}`);
   }
 
+  reset(): Observable<any> {
+    return this.http.get(`${this.environment.apiUrl}/reset`);
+  }
+
+  loadDocs(): Observable<any> {
+    return this.http.get(`${this.environment.apiUrl}/loaddocs`);
+  }
+
 }
