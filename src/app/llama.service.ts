@@ -21,6 +21,10 @@ export class LlamaService {
     return this.http.get<Array<any>>(`${this.environment.apiUrl}/collections`);
   }
 
+  getCollection(name: string): Observable<any> {
+    return this.http.get<any>(`${this.environment.apiUrl}/collection/${name}`);
+  }
+
   deleteCollection(name: string): Observable<any> {
     return this.http.delete(`${this.environment.apiUrl}/collection/${name}`);
   }

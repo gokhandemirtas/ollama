@@ -22,6 +22,7 @@
      </mat-list>
     </mat-card-content>
     <mat-card-actions align="end">
+      <button (click)="getCollection()" mat-stroked-button color="warn" [disabled]="isWaiting()">Get knowledge base</button>
       <button (click)="reset()" mat-stroked-button color="warn" [disabled]="isWaiting()">Reset store</button>
       <button (click)="fetchCollections()" mat-stroked-button color="primary">Get collections</button>
       <button (click)="loadDocs()" mat-stroked-button color="warn">Load from bucket</button>

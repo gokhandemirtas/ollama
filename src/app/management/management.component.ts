@@ -35,8 +35,18 @@ export class ManagementComponent implements OnInit {
   fetchCollections() {
     this.isWaiting.set(true);
     this.service.getCollections().pipe(take(1)).subscribe((collections) => {
-      console.log(collections);
       this.collections.set(collections);
+      this.isWaiting.set(false);
+    });
+  }
+
+  getCollection(name: string = 'bla') {
+    this.isWaiting.set(true);
+    this.service.getCollection(name).pipe(take(1)).subscribe((response) => {
+      this.snackbar.open(`Got: ${name} successfully`, 'Dismiss', { duration: 1000 });
+      console.log(response);
+      this.isWaiting.set(false);
+    },() => {
       this.isWaiting.set(false);
     });
   }
