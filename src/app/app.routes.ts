@@ -12,5 +12,6 @@ export const routes: Routes = [
     path: 'manage',
     loadComponent: () => ManagementComponent,
     pathMatch: 'full'
-  }
+  },
+  { path: '', redirectTo: '/prompt', pathMatch: 'full' },
 ];

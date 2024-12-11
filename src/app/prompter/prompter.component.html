@@ -6,7 +6,8 @@
           <p class="mat-body-1">
             <span class="timestamp-container" [attr.title]="message.duration">
               {{ message.timestamp | date: 'short' }}
-            </span> {{ message.text }}
+            </span>
+            <span [innerHTML]="message.text | linebreak"></span>
           </p>
         }
       </aside>

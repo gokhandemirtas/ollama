@@ -15,7 +15,7 @@ import { Ollama } from 'ollama';
 
 let chromaClient;
 let llamaClient;
-let userCollection;
+let chatHistoryCollection;
 let knowledgeCollection;
 const topic = 'ADND';
 
@@ -28,10 +28,10 @@ await server.register(cors, {
 });
 
 async function setup() {
-  chromaClient = new ChromaClient({ path: process.env['CHROMA_URL'] });
-  llamaClient = new Ollama({ host: process.env['LLAMA_URL'] });
+  chromaClient = new ChromaClient({ path: process.env.CHROMA_URL });
+  llamaClient = new Ollama({ baseUrl: process.env.LLAMA_URL, model: process.env.LLM_MODEL });
 
-  userCollection = await chromaClient.getOrCreateCollection({
+  chatHistoryCollection = await chromaClient.getOrCreateCollection({
     name: process.env.USER_COLLECTION,
     embeddingFunction: new OllamaEmbeddingFunction({
       url: `${process.env.LLAMA_URL}/api/embeddings`,
@@ -48,6 +48,14 @@ async function setup() {
   });
 }
 
+function getSystemPrompt(knowledge, chatHistory) {
+  return `
+    You are an an expert on role playing game Dungeons and Dragons.
+    This is your knowledge base: ${knowledge}.
+    This is your chat history with the user ${chatHistory}
+  `
+}
+
 function updateKnowledge(content) {
   knowledgeCollection.upsert({
     documents: [content],
@@ -56,11 +64,11 @@ function updateKnowledge(content) {
   });
 }
 
-function updateUserResponse(question, answer) {
-  userCollection.upsert({
-    documents: [question, answer],
-    ids: [uniqueId('question'), uniqueId('answer')],
-    metadata: ['user-answers']
+function updateChatHistory(question) {
+  chatHistoryCollection.upsert({
+    documents: [question],
+    ids: [uniqueId('question')],
+    metadata: ['user-questions']
   });
 }
 
@@ -138,34 +146,26 @@ server.get('/loaddocs', async (request, reply) => {
 
 server.post('/query', async (request, reply) => {
   try {
-    console.log(`%c Query: ${request.body} `, 'background: #00C424; color: #fff');
+    console.log('\x1b[36m%s\x1b[0m', `Query: ${request.body} `);
     const knowledge = await knowledgeCollection.query({
       queryTexts: request.body,
-      nResults: 5
+      nResults: 30
     });
 
-    const userResponse = await userCollection.query({
-      queryTexts: request.body,
-      nResults: 5
-    });
-  
+    const chatHistory = await chatHistoryCollection.peek({
+      limit: 10,
+    })
 
-    console.log(userResponse);
-
-    const llamaResponse = await llamaClient.generate({
+    const llamaResponse = await llamaClient.chat({
       model: process.env.LLM_MODEL,
-      system: `
-        You are an an expert on role playing game Dungeons and Dragons, and this is your knowledge base:
-        ${knowledge.documents.join('')}. Dungeons and Dragons is a multiplayer game where people can create a character choosing from variety of races, classes, distribute ability points, create a background, and decide on actions by rolling a multi-sided dice and role playing. The abilities and skills of the character is recorded on a character sheet.
-        
-        The dungeon master creates a narrative and a story within the Dungeons and Dragons universe, and players reenact their characters within the story by talking. As the players advance through the game, they acquire experience points which allows them to level up and access better skills that are available to their class and race. For example, a level 0 mage can only do cantrips, where a level 5 mage can cast a fireball spell. The main objective is for the players to work as a team, and help each other to overcome common challenges and dangers.`,
-      prompt: `
-        Answer this question ${request.body} in a short, clear manner. Remember the answers you've given before by checking ${userResponse.documents.join('')}.
-      `
+      messages: [
+        { role: 'system', content: getSystemPrompt(knowledge.documents.join(), chatHistory.documents.join(', ')) },
+        { role: 'user', content: request.body }
+      ],
     });
     reply.type('application/json').code(200);
-    updateUserResponse(request.body, llamaResponse.response);
-    console.log(`%c Response: ${llamaResponse.response} `, 'background: #0188FF; color: #fff');
+    updateChatHistory(request.body ?? 'no previous questions');
+
     return llamaResponse
   } catch (error) {
     console.log('error while replying query: ', error)
@@ -177,6 +177,8 @@ server.post('/query', async (request, reply) => {
 server.listen({ port: 3000 }, (err, address) => {
   if (err) throw err
   setup();
-  console.log(`Server running on: ${address}, using: ${process.env.LLM_MODEL}` )
+  console.log("\x1b[35m ------------------------------------------------------------ \x1b[0m");
+  console.log(`Server running on: ${address}, using: ${process.env.LLM_MODEL}`);
+  console.log("\x1b[35m ------------------------------------------------------------ \x1b[0m");
   // Server is now listening on ${address}
 })

@@ -9,6 +9,7 @@ import { Message } from '../constants/message';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { take } from 'rxjs';
+import { LinebreakPipe } from '../pipes/linebreak.pipe';
 
 @Component({
     selector: 'app-root',
@@ -21,6 +22,7 @@ import { take } from 'rxjs';
       MatFormFieldModule,
       CommonModule,
       MatProgressBarModule,
+      LinebreakPipe
     ],
     templateUrl: `./prompter.component.html`,
     styleUrl: './prompter.component.scss'
@@ -62,7 +64,7 @@ export class PrompterComponent {
       this.updateReplies({
         timestamp: new Date(response.created_at).toISOString(),
         duration: response.eval_count / response.eval_duration * 10^9,
-        text: response.response
+        text: response.message.content
       });
     }, () => {
       this.isWaiting.set(false);
