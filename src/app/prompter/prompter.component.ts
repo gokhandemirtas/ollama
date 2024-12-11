@@ -35,7 +35,7 @@ export class PrompterComponent {
   });
 
   isWaiting = signal(false);
-  messages = signal<Array<Message>>([]);
+  messages = signal<Message>({} as Message);
 
   ngOnInit(): void {
 
@@ -46,9 +46,7 @@ export class PrompterComponent {
   }
 
   updateReplies(part: Message) {
-    this.messages.update(values => {
-      return [...values, part];
-    });
+    this.messages.update(() => part);
   }
 
   async submit() {

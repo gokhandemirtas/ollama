@@ -2,12 +2,12 @@
   <mat-card appearance="outlined">
     <mat-card-content>
       <aside class="response-container">
-        @for(message of messages(); track message) {
+        @if(messages().text) {
           <p class="mat-body-1">
-            <span class="timestamp-container" [attr.title]="message.duration">
-              {{ message.timestamp | date: 'short' }}
+            <span class="timestamp-container" [attr.title]="messages().duration">
+              {{ messages().timestamp | date: 'short' }}
             </span>
-            <span [innerHTML]="message.text | linebreak"></span>
+            <span [innerHTML]="messages().text | linebreak"></span>
           </p>
         }
       </aside>

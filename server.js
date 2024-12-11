@@ -48,11 +48,17 @@ async function setup() {
   });
 }
 
-function getSystemPrompt(knowledge, chatHistory) {
+function getSystemPrompt() {
   return `
-    You are an an expert on role playing game Dungeons and Dragons.
+    You are an expert and helpful assistant on role playing game Dungeons and Dragons.
+  `
+}
+
+function getUserPrompt(question, knowledge, chatHistory) {
+  return `
     This is your knowledge base: ${knowledge}.
     This is your chat history with the user ${chatHistory}
+    Answer this question ${question}
   `
 }
 
@@ -156,11 +162,13 @@ server.post('/query', async (request, reply) => {
       limit: 10,
     })
 
+    console.table(chatHistory.documents);
+
     const llamaResponse = await llamaClient.chat({
       model: process.env.LLM_MODEL,
       messages: [
-        { role: 'system', content: getSystemPrompt(knowledge.documents.join(), chatHistory.documents.join(', ')) },
-        { role: 'user', content: request.body }
+        { role: 'system', content: getSystemPrompt() },
+        { role: 'user', content: getUserPrompt(request.body, knowledge.documents.join(), chatHistory.documents.join(', ')) },
       ],
     });
     reply.type('application/json').code(200);
