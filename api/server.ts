@@ -1,7 +1,8 @@
 import cors from '@fastify/cors';
 import { CSVLoader } from '@langchain/community/document_loaders/fs/csv';
 import { PDFLoader } from '@langchain/community/document_loaders/fs/pdf';
-import { ChromaClient, OllamaEmbeddingFunction } from 'chromadb';
+import Collection,  { ChromaClient, OllamaEmbeddingFunction, Metadata } from 'chromadb';
+
 import 'dotenv/config';
 import Fastify from 'fastify';
 import { DirectoryLoader } from 'langchain/document_loaders/fs/directory';
@@ -11,13 +12,19 @@ import {
 } from 'langchain/document_loaders/fs/json';
 import { TextLoader } from 'langchain/document_loaders/fs/text';
 import { uniqueId } from 'lodash-es';
-import { Ollama } from 'ollama';
+import ollama, { Ollama } from 'ollama';
 
-let chromaClient;
-let llamaClient;
-let chatHistoryCollection;
-let knowledgeCollection;
-const topic = 'ADND';
+let chromaClient: ChromaClient;
+let llamaClient: any;
+
+const topic: Metadata = {
+  adnd: process.env.TOPIC!
+};
+
+const embeddingFunction = new OllamaEmbeddingFunction({
+  url: `${process.env.LLAMA_URL}/api/embeddings`,
+  model: process.env.EMBEDDER_MODEL!
+});
 
 const server = Fastify({
   logger: true, 
@@ -27,25 +34,47 @@ await server.register(cors, {
   origin: [process.env.WEB_APP_URL]
 });
 
+async function createCollections() {
+  const name = process.env.CHAT_HISTORY_COLLECTION!;
+  try {
+    await chromaClient.getOrCreateCollection({
+      name,
+      embeddingFunction
+    });
+  } catch (error) {
+    console.log(`[createCollections:${name}]`, error);
+  }
+
+  try {
+    await chromaClient.getOrCreateCollection({
+      name: process.env.KNOWLEDGE_COLLECTION!,
+      embeddingFunction
+    }); 
+  } catch (error) {
+    console.log(`[createCollections:${name}]`, error);
+  }
+}
+
+async function getCollectionByName(name: string) {
+  try {
+    return await chromaClient.getCollection({
+      name,
+      embeddingFunction
+    }); 
+  } catch (error) {
+    console.log(`[getCollectionByName:${name}]`, error);
+  }
+}
+
 async function setup() {
   chromaClient = new ChromaClient({ path: process.env.CHROMA_URL });
-  llamaClient = new Ollama({ baseUrl: process.env.LLAMA_URL, model: process.env.LLM_MODEL });
 
-  chatHistoryCollection = await chromaClient.getOrCreateCollection({
-    name: process.env.USER_COLLECTION,
-    embeddingFunction: new OllamaEmbeddingFunction({
-      url: `${process.env.LLAMA_URL}/api/embeddings`,
-      model: process.env.EMBEDDER_MODEL
-    })
+  llamaClient = await ollama.create({
+    model: process.env.LLM_MODEL!,
+    path: process.env.LLAMA_URL!
   });
 
-  knowledgeCollection = await chromaClient.getOrCreateCollection({
-    name: topic,
-    embeddingFunction: new OllamaEmbeddingFunction({
-      url: `${process.env.LLAMA_URL}/api/embeddings`,
-      model: process.env.EMBEDDER_MODEL
-    })
-  });
+  await createCollections();
 }
 
 function getSystemPrompt() {
@@ -54,8 +83,7 @@ function getSystemPrompt() {
   `
 }
 
-function getUserPrompt(question, knowledge, chatHistory) {
-  console.log(chatHistory);
+function getUserPrompt(question: string, knowledge: string, chatHistory: string) {
   return `
     You are an expert and helpful assistant specializing in Dungeons and Dragons.
     Below is the knowledge base you can use to answer the question:
@@ -71,25 +99,33 @@ function getUserPrompt(question, knowledge, chatHistory) {
   `;
 }
 
-
-function updateKnowledge(content) {
-  knowledgeCollection.upsert({
-    documents: [content],
-    ids: [uniqueId('llm')],
-    metadata: [topic]
-  });
-}
-
-function updateChatHistory(role, content) {
-  if (role && content) {
-    chatHistoryCollection.upsert({
+async function updateKnowledge(content: string) {
+  try {
+    const knowledgeCollection = await getCollectionByName(process.env.KNOWLEDGE_COLLECTION!);
+    knowledgeCollection?.upsert({
       documents: [content],
-      ids: [uniqueId(role)],
-      metadata: { role, timestamp: new Date().toISOString() },
+      ids: [uniqueId('llm')],
+      metadatas: [topic]
     });
+  } catch (error) {
+    console.log(`[updateKnowledge]`, error);
   }
 }
 
+async function updateChatHistory(role: string, content: string) {
+  try {
+    const chatHistoryCollection = await getCollectionByName(process.env.CHAT_HISTORY_COLLECTION!);
+    if (role && content) {
+      chatHistoryCollection?.upsert({
+        documents: [content],
+        ids: [uniqueId(role)],
+        metadatas: [{ role, timestamp: new Date().toISOString() }],
+      });
+    }
+  } catch (error) {
+    console.log(`[updateChatHistory]`, error);
+  }
+}
 
 server.get('/heartbeat', (request, reply) => {
   chromaClient.heartbeat();
@@ -106,31 +142,36 @@ server.get('/collections', async(request, reply) => {
     return collections
   } catch (error) {
     reply.type('application/json').code(500);
+    console.log(`[GET /collections]`, error);
     return { error }
   }
 })
 
 server.get('/collection/:name', async(request, reply) => {
   try {
-    const peek = await chatHistoryCollection.peek({
+    const collection = await getCollectionByName(request.body as string);
+    const peek = collection?.peek({
       limit: 1000
     });
     reply.type('application/json').code(200);
     return peek
   } catch (error) {
     reply.type('application/json').code(500);
+    console.log(`[GET /collection/:name]`, error);
     return { error }
   }
 })
 
 server.delete('/collection/:name', async(request, reply) => {
   try {
+    const name: any = request.body;
     const collections = await chromaClient.deleteCollection({
-      name: request.params.name
+      name
     });
     reply.type('application/json').code(200);
     return collections
   } catch (error) {
+    console.log(`[DELETE /collection/:name]`, error);
     reply.type('application/json').code(500);
     return { error }
   }
@@ -139,25 +180,25 @@ server.delete('/collection/:name', async(request, reply) => {
 server.get('/loaddocs', async (request, reply) => {
   let response;
   try {
-	const loader = new DirectoryLoader(
-	  './src/docbucket',
-	  {
-		'.json': (path) => new JSONLoader(path, '/texts'),
-		'.jsonl': (path) => new JSONLinesLoader(path, '/html'),
-		'.txt': (path) => new TextLoader(path),
-		'.csv': (path) => new CSVLoader(path, 'text'),
-		'.pdf': (path) => new PDFLoader(path)
-	  }
-	);
-	response = await loader.load();
-  response.map((item) => {
-    updateKnowledge(item.pageContent);
-  });
+    const loader = new DirectoryLoader(
+      './src/docbucket',
+      {
+      '.json': (path) => new JSONLoader(path, '/texts'),
+      '.jsonl': (path) => new JSONLinesLoader(path, '/html'),
+      '.txt': (path) => new TextLoader(path),
+      '.csv': (path) => new CSVLoader(path, 'text'),
+      '.pdf': (path) => new PDFLoader(path)
+      }
+    );
+    response = await loader.load();
+    response.map((item) => {
+      updateKnowledge(item.pageContent);
+    });
   
-	reply.type('application/json').code(200);
-	return null;
+	  reply.type('application/json').code(200);
+	  return null;
   } catch (error) {
-    console.log(error);
+    console.log(`[GET /loaddocs]`, error);
     reply.type('application/json').code(500);
     return { error }
   }
@@ -165,31 +206,29 @@ server.get('/loaddocs', async (request, reply) => {
 
 server.post('/query', async (request, reply) => {
   try {
-    const userQuery = request.body; // Assume the user's query is passed in `query`
+    const userQuery = request.body as string;
     console.log('\x1b[36m%s\x1b[0m', `Query: ${userQuery}`);
 
-    // Fetch relevant knowledge
-    const knowledge = await knowledgeCollection.query({
+    const knowledgeCollection = await getCollectionByName(process.env.KNOWLEDGE_COLLECTION!);
+    const knowledge = knowledgeCollection!.query({
       queryTexts: [userQuery],
       nResults: 30,
     });
 
-    // Fetch chat history, handle empty history gracefully
-    const chatHistoryResponse = await chatHistoryCollection.peek({
+    const chatHistoryCollection = await getCollectionByName(process.env.KNOWLEDGE_COLLECTION!);
+    const chatHistoryResponse = await chatHistoryCollection!.peek({
       limit: 50,
     });
     const chatHistory = chatHistoryResponse.documents
       ? chatHistoryResponse.documents.map(doc => `[${doc?.metadata?.role}] ${doc?.message?.content}`).join('\n')
       : "No previous conversation available.";
 
-    // Construct user prompt
     const userPrompt = getUserPrompt(
       userQuery,
       knowledge.documents.map(doc => doc.message?.content || "").join("\n"),
       chatHistory
     );
 
-    // Query LLM with system and user prompts
     const llamaResponse = await llamaClient.chat({
       model: process.env.LLM_MODEL,
       messages: [
