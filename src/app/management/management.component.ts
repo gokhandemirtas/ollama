@@ -42,7 +42,7 @@ export class ManagementComponent implements OnInit {
 
   getCollection(name: string = 'bla') {
     this.isWaiting.set(true);
-    this.service.getCollection(name).pipe(take(1)).subscribe((response) => {
+    this.service.getCollection('user-prompts').pipe(take(1)).subscribe((response) => {
       this.snackbar.open(`Got: ${name} successfully`, 'Dismiss', { duration: 1000 });
       console.log(response);
       this.isWaiting.set(false);

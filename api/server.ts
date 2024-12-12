@@ -55,12 +55,22 @@ function getSystemPrompt() {
 }
 
 function getUserPrompt(question, knowledge, chatHistory) {
+  console.log(chatHistory);
   return `
-    This is your knowledge base: ${knowledge}.
-    This is your chat history with the user ${chatHistory}
-    Answer this question ${question}
-  `
+    You are an expert and helpful assistant specializing in Dungeons and Dragons.
+    Below is the knowledge base you can use to answer the question:
+    ---
+    ${knowledge}
+    ---
+    Here is the previous conversation history for context:
+    ---
+    ${chatHistory}
+    ---
+    Based on the above, please answer the following question:
+    "${question}"
+  `;
 }
+
 
 function updateKnowledge(content) {
   knowledgeCollection.upsert({
@@ -70,13 +80,16 @@ function updateKnowledge(content) {
   });
 }
 
-function updateChatHistory(question) {
-  chatHistoryCollection.upsert({
-    documents: [question],
-    ids: [uniqueId('question')],
-    metadata: ['user-questions']
-  });
+function updateChatHistory(role, content) {
+  if (role && content) {
+    chatHistoryCollection.upsert({
+      documents: [content],
+      ids: [uniqueId(role)],
+      metadata: { role, timestamp: new Date().toISOString() },
+    });
+  }
 }
+
 
 server.get('/heartbeat', (request, reply) => {
   chromaClient.heartbeat();
@@ -99,7 +112,7 @@ server.get('/collections', async(request, reply) => {
 
 server.get('/collection/:name', async(request, reply) => {
   try {
-    const peek = await knowledgeCollection.peek({
+    const peek = await chatHistoryCollection.peek({
       limit: 1000
     });
     reply.type('application/json').code(200);
@@ -152,33 +165,50 @@ server.get('/loaddocs', async (request, reply) => {
 
 server.post('/query', async (request, reply) => {
   try {
-    console.log('\x1b[36m%s\x1b[0m', `Query: ${request.body} `);
+    const userQuery = request.body; // Assume the user's query is passed in `query`
+    console.log('\x1b[36m%s\x1b[0m', `Query: ${userQuery}`);
+
+    // Fetch relevant knowledge
     const knowledge = await knowledgeCollection.query({
-      queryTexts: request.body,
-      nResults: 30
+      queryTexts: [userQuery],
+      nResults: 30,
     });
 
-    const chatHistory = await chatHistoryCollection.peek({
-      limit: 10,
-    })
+    // Fetch chat history, handle empty history gracefully
+    const chatHistoryResponse = await chatHistoryCollection.peek({
+      limit: 50,
+    });
+    const chatHistory = chatHistoryResponse.documents
+      ? chatHistoryResponse.documents.map(doc => `[${doc?.metadata?.role}] ${doc?.message?.content}`).join('\n')
+      : "No previous conversation available.";
 
-    console.table(chatHistory.documents);
+    // Construct user prompt
+    const userPrompt = getUserPrompt(
+      userQuery,
+      knowledge.documents.map(doc => doc.message?.content || "").join("\n"),
+      chatHistory
+    );
 
+    // Query LLM with system and user prompts
     const llamaResponse = await llamaClient.chat({
       model: process.env.LLM_MODEL,
       messages: [
         { role: 'system', content: getSystemPrompt() },
-        { role: 'user', content: getUserPrompt(request.body, knowledge.documents.join(), chatHistory.documents.join(', ')) },
+        { role: 'user', content: userPrompt },
+        { role: 'user', content: `Previous conversation:\n${chatHistory}` }, // Explicitly add previous history
       ],
     });
-    reply.type('application/json').code(200);
-    updateChatHistory(request.body ?? 'no previous questions');
 
-    return llamaResponse
+    // Update chat history with the user query
+    updateChatHistory('assistant', llamaResponse.message.content);
+    updateChatHistory('user', userQuery ?? 'No previous questions.');
+
+    reply.type('application/json').code(200);
+    return llamaResponse;
   } catch (error) {
-    console.log('error while replying query: ', error)
+    console.log('Error while replying to query:', error);
     reply.type('application/json').code(500);
-    return { error }
+    return { error };
   }
 });
 
