@@ -37,7 +37,7 @@ export default function setRoutes(app: Application, chromaClient: ChromaClient, 
 
   app.get("/collection/:name", async(request, reply, next) => {
     try {
-      const collection = await getCollectionByName(request.params.name, chromaClient);
+      const collection: any = await getCollectionByName(request.params.name, chromaClient);
       const peek = collection?.peek({
         limit: 1000
       });
