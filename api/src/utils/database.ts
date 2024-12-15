@@ -3,8 +3,8 @@ import { ChromaClient, Metadata, OllamaEmbeddingFunction } from "chromadb";
 import { uniqueId } from "lodash-es";
 
 export const embeddingFunction = new OllamaEmbeddingFunction({
-  url: `${process.env['LLAMA_URL']}/api/embeddings`,
-  model: process.env['EMBEDDER_MODEL']!
+  url: `${process.env.LLAMA_URL!}/api/embeddings`,
+  model: process.env.EMBEDDER_MODEL!
 });
 
 export async function getCollections(chromaClient: ChromaClient) {
@@ -16,29 +16,25 @@ export async function getCollections(chromaClient: ChromaClient) {
 }
 
 export async function deleteCollection(name: string, chromaClient: ChromaClient) {
-  try {
-    return await chromaClient.deleteCollection({
-      name
-    });
-  } catch (error) {
-    return Promise.reject(error);
-  }
+  return chromaClient.deleteCollection({
+    name
+  })
 }
 
 export async function createCollections(chromaClient: ChromaClient) {
   try {
     await chromaClient.getOrCreateCollection({
-      name: process.env['CHAT_HISTORY_COLLECTION']!,
+      name: process.env.CHAT_HISTORY_COLLECTION!,
       embeddingFunction
     });
     await chromaClient.getOrCreateCollection({
-      name: process.env['KNOWLEDGE_COLLECTION']!,
+      name: process.env.KNOWLEDGE_COLLECTION!,
       embeddingFunction
     });
-    return Promise.resolve(true);
+    return true;
   } catch (error) {
     console.log(`[createCollections]`, error);
-    return Promise.reject(error);
+    return error;
   }
 }
 

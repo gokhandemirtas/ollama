@@ -10,7 +10,7 @@ import { PDFLoader } from "@langchain/community/document_loaders/fs/pdf";
 import { TextLoader } from "langchain/document_loaders/fs/text";
 import { updateKnowledge } from "./database";
 
-export async function loadDirectory(path = process.env['DOC_BUCKET']!, chromaClient: ChromaClient, topic: any) {
+export async function loadDirectory(path = process.env.DOC_BUCKET!, chromaClient: ChromaClient, topic: any) {
   try {
     const loader = new DirectoryLoader(
       path,
@@ -28,7 +28,6 @@ export async function loadDirectory(path = process.env['DOC_BUCKET']!, chromaCli
     });
     return Promise.resolve(documents)
   } catch (error) {
-    console.log(`[GET /loaddocs]`, error);
     return Promise.reject(error)
   }
 }

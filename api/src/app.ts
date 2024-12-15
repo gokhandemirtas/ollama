@@ -1,6 +1,8 @@
 import "dotenv/config";
 
 import { ChromaClient } from "chromadb";
+import ErrorHandler from "./utils/error-handler";
+import Logger from "./utils/logger";
 import cors from "cors";
 import { createCollections } from "./utils/database";
 import express from "express";
@@ -11,7 +13,9 @@ import setRoutes from "./routes/index";
 
 const app = express();
 app.use(json());
-app.use(cors())
+app.use(cors({ origin: process.env.CORS_ORIGIN! }));
+app.use(Logger);
+app.use(ErrorHandler);
 
 let chromaClient: ChromaClient;
 let llamaClient: any;
@@ -31,15 +35,13 @@ async function setup() {
   } catch (error) {
     console.log(`[Setup Ollama connection]`, error);
   }
-
   setRoutes(app, chromaClient, llamaClient);
 }
 
-
-
 app.listen(process.env.API_PORT || 3000, async() => {
   await setup();
-  console.log("\x1b[35m ------------------------------------------------------------ \x1b[0m");
-  console.log(`Server running on: ${process.env.API_PORT}, using: ${process.env.LLM_MODEL}`);
-  console.log("\x1b[35m ------------------------------------------------------------ \x1b[0m");
+  console.table({
+    API_PORT: process.env.API_PORT,
+    LLM_MODEL: process.env.LLM_MODEL
+  });
 });

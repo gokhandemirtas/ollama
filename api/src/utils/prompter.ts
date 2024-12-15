@@ -3,15 +3,15 @@ import { getSystemPrompt, getUserPrompt } from "./prompts";
 
 import { ChromaClient } from "chromadb";
 
-export async function prompter(userQuery: string, chromaClient: ChromaClient, llamaClient: any, model = process.env['LLM_MODEL']) {
+export async function prompter(userQuery: string, chromaClient: ChromaClient, llamaClient: any, model = process.env.LLM_MODEL!) {
   try {
-    const knowledgeCollection = await getCollectionByName(process.env['KNOWLEDGE_COLLECTION']!, chromaClient);
+    const knowledgeCollection = await getCollectionByName(process.env.KNOWLEDGE_COLLECTION!, chromaClient);
     const knowledge = await knowledgeCollection!.query({
       queryTexts: [userQuery],
       nResults: 30,
     });
 
-    const chatHistoryCollection = await getCollectionByName(process.env['KNOWLEDGE_COLLECTION']!, chromaClient);
+    const chatHistoryCollection = await getCollectionByName(process.env.KNOWLEDGE_COLLECTION!, chromaClient);
     const chatHistoryResponse = await chatHistoryCollection!.peek({
       limit: 50,
     });
@@ -30,7 +30,7 @@ export async function prompter(userQuery: string, chromaClient: ChromaClient, ll
       messages: [
         { role: "system", content: getSystemPrompt() },
         { role: "user", content: userPrompt },
-        { role: "user", content: `Previous conversation:\n${chatHistory}` }, // Explicitly add previous history
+        { role: "user", content: `Previous conversation:\n${chatHistory}` },
       ],
     });
 
@@ -38,6 +38,6 @@ export async function prompter(userQuery: string, chromaClient: ChromaClient, ll
     updateChatHistory("assistant", llamaResponse.message.content, chromaClient);
     updateChatHistory("user", userQuery ?? "No previous questions.", chromaClient);
   } catch (error) {
-    Promise.reject(error);
+    return error;
   }
 }
