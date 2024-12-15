@@ -1,0 +1,17 @@
+version: "3.8"
+services:
+  postgres:
+    image: pgvector/pgvector:pg17
+    container_name: pgvector
+    restart: always
+    environment:
+      POSTGRES_USER: sutterkane
+      POSTGRES_PASSWORD: baBay3R0
+      POSTGRES_DB: adnd
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:

@@ -4,7 +4,10 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
-    "build": "ng build"
+    "build": "ng build",
+    "lama:serve": "ollama serve",
+    "lama:run": "ollama run llama3.2",
+    "chroma": "cd chroma && docker compose up"
   },
   "private": true,
   "type": "module",
