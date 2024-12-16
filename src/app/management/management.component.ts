@@ -1,3 +1,4 @@
+import { COMMA, ENTER } from '@angular/cdk/keycodes';
 import { Component, OnInit, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
@@ -11,6 +12,8 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatListModule } from '@angular/material/list';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { MetadataComponent } from './metadata.component';
+import { UploadRequestPayload } from '../models/upload-request-payload';
 import { take } from 'rxjs';
 
 @Component({
@@ -26,7 +29,8 @@ import { take } from 'rxjs';
       MatIconModule,
       MatSnackBarModule,
       MatFormFieldModule,
-      MatInputModule
+      MatInputModule,
+      MetadataComponent
     ],
     templateUrl: './management.component.html',
     styleUrl: './management.component.scss'
@@ -34,12 +38,13 @@ import { take } from 'rxjs';
 export class ManagementComponent implements OnInit {
   constructor(public service: LlamaService, public snackbar: MatSnackBar) {}
 
+  readonly separatorKeysCodes = [ENTER, COMMA] as const;
+
   collections = signal<Array<any>>([]);
   isWaiting = signal(false);
 
   fileForm = new FormGroup({
     category: new FormControl(null, [Validators.required, Validators.minLength(3), Validators.maxLength(20)]),
-    metadata: new FormControl(null, [Validators.required, Validators.minLength(10), Validators.maxLength(200)]),
   });
 
   selectedFile: File | null = null;
@@ -54,11 +59,11 @@ export class ManagementComponent implements OnInit {
     });
   }
 
-  getCollection(name: string = 'bla') {
+  getCollection(name: string) {
     this.isWaiting.set(true);
     this.service.getCollection(name).pipe(take(1)).subscribe((response) => {
       this.snackbar.open(`Got: ${name} successfully`, 'Dismiss', { duration: 1000 });
-      console.log(response);
+      console.table(response);
       this.isWaiting.set(false);
     },() => {
       this.isWaiting.set(false);
@@ -87,23 +92,25 @@ export class ManagementComponent implements OnInit {
 
   onFileSelected(event: any) {
     this.selectedFile = event.target.files[0];
-    console.log(event.target.files[0])
   }
 
   upload() {
-    // this.isWaiting.set(true);
-    const values = this.fileForm.value;
+    this.isWaiting.set(true);
+    const { category, metadata } = this.fileForm.value as any;
 
-    const uploadData = new FormData();
-    /* uploadData.append('file', this.selectedFile!, this.selectedFile!.name); */
-    console.log(this.selectedFile)
-
-    /* this.service.upload(file, category, metadata).pipe(take(1)).subscribe(() => {
+    this.service.upload({
+      category,
+      metadata,
+    }, this.selectedFile!).pipe(take(1)).subscribe(() => {
       this.isWaiting.set(false);
       this.snackbar.open(`Uploaded file successfully`, 'Dismiss', { duration: 1000 });
+      this.fileForm.reset();
+      this.selectedFile = null;
     },() => {
       this.isWaiting.set(false);
-    }); */
+      this.fileForm.reset();
+      this.selectedFile = null;
+    });
   }
 
   ngOnInit(): void {

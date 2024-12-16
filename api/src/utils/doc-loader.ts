@@ -1,16 +1,16 @@
+import { ChromaClient, Metadata } from "chromadb";
 import {
   JSONLinesLoader,
   JSONLoader,
 } from "langchain/document_loaders/fs/json";
 
 import { CSVLoader } from "@langchain/community/document_loaders/fs/csv";
-import { ChromaClient } from "chromadb";
 import { DirectoryLoader } from "langchain/document_loaders/fs/directory";
 import { PDFLoader } from "@langchain/community/document_loaders/fs/pdf";
 import { TextLoader } from "langchain/document_loaders/fs/text";
 import { updateKnowledge } from "./database";
 
-export async function loadDirectory(path = process.env.DOC_BUCKET!, chromaClient: ChromaClient, topic: any) {
+export async function loadDirectory(path = process.env.DOC_BUCKET!, chromaClient: ChromaClient, metadatas: Array<Metadata>) {
   try {
     const loader = new DirectoryLoader(
       path,
@@ -24,7 +24,7 @@ export async function loadDirectory(path = process.env.DOC_BUCKET!, chromaClient
     );
     const documents = await loader.load();
     documents.map((item) => {
-      updateKnowledge(item.pageContent, topic, chromaClient);
+      updateKnowledge(item.pageContent, metadatas, chromaClient);
     });
     return Promise.resolve(documents)
   } catch (error) {

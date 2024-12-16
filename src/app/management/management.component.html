@@ -41,22 +41,23 @@
     </mat-card-header>
     <mat-card-content>
       <form [formGroup]="fileForm">
+        <br />
         <input type="file" required accept=".pdf" (change)="onFileSelected($event)"/>
+        <br /><br />
         <div>
           <mat-form-field>
             <mat-label>Category</mat-label>
-            <input type="text" matInput formControlName="category" name="category" required/>
+            <input type="text" matInput formControlName="category" name="category" required maxlength="20"/>
           </mat-form-field>
         </div>
         <div>
-          <mat-form-field>
-            <mat-label>Metadata</mat-label>
-            <textarea matInput formControlName="metadata" name="metadata" required></textarea>
-          </mat-form-field>
+          <app-metadata [parentForm]="fileForm"></app-metadata>
         </div>
       </form>
 
-      <button (click)="upload()" mat-stroked-button color="warn" [disabled]="isWaiting()">Upload</button>
     </mat-card-content>
+    <mat-card-actions align="end">
+      <button (click)="upload()" mat-stroked-button color="warn" [disabled]="isWaiting()" [attr.disabled]="fileForm.invalid || !!selectedFile">Upload</button>
+    </mat-card-actions>
   </mat-card>
 </section>

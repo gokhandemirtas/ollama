@@ -1,5 +1,6 @@
 import { ChromaClient, Metadata, OllamaEmbeddingFunction } from "chromadb";
 
+import { bgMagenta } from "ansis";
 import { uniqueId } from "lodash-es";
 
 export const embeddingFunction = new OllamaEmbeddingFunction({
@@ -54,14 +55,15 @@ export async function getCollectionByName(name: string, chromaClient: ChromaClie
   }
 }
 
-export async function updateKnowledge(content: string, metadata: Metadata, chromaClient: ChromaClient) {
+export async function updateKnowledge(content: string, metadatas: Array<Metadata>, chromaClient: ChromaClient) {
   try {
     const knowledgeCollection = await getCollectionByName(process.env['KNOWLEDGE_COLLECTION']!, chromaClient) as any;
     knowledgeCollection.upsert({
       documents: [content],
       ids: [uniqueId('llm')],
-      metadatas: [metadata]
+      metadatas
     });
+    console.log(bgMagenta(`[updateKnowledge] ${content}, ${metadatas}`));
     return Promise.resolve(true);
   } catch (error) {
     console.log(`[updateKnowledge]`, error);

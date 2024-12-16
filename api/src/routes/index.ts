@@ -27,6 +27,22 @@ export default function setRoutes(app: Application, chromaClient: ChromaClient):
     }
   });
 
+  app.post('/upload', async(request, reply, next)  => {
+    try {
+      if (!!request.files) {
+        const file = (request.files as any).file;
+        file.mv(`./${process.env.DOC_BUCKET!}/${request.body.name}`);
+        const metadatas = request.body.metadata.split(',').map((name: string) => ({ name: name.replace(' ', '') })) && [];
+        const uploaded = await loadDirectory(process.env.DOC_BUCKET!, chromaClient, metadatas);
+        reply.type("application/json").status(200).send(uploaded);
+      } else {
+        next('Could not upload file to server');
+      }
+    } catch (error) {
+      next(error);
+    }
+  });
+
   app.get("/collections", async(request, reply, next) => {
     try {
       reply.type("application/json");

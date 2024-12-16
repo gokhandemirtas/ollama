@@ -6,12 +6,14 @@ import Logger from "./utils/logger";
 import cors from "cors";
 import { createCollections } from "./utils/database";
 import express from "express";
+import fileUpload from "express-fileupload";
 import { json } from "body-parser";
 import setRoutes from "./routes/index";
 
 const app = express();
 app.use(json());
 app.use(cors({ origin: process.env.CORS_ORIGIN! }));
+app.use(fileUpload());
 app.use(Logger);
 app.use(ErrorHandler);
 
