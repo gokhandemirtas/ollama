@@ -1,8 +1,8 @@
 import { ChromaClient, Metadata } from 'chromadb';
-import { deleteCollection, getCollectionByName, getCollections, updateKnowledge } from '../utils/database';
+import { createCollections, deleteCollection, getCollectionByName, getCollections, updateKnowledge } from '../utils/database';
 
 import { Application } from 'express';
-import { green } from 'ansis';
+import { bgBlue } from 'ansis';
 import { loadDirectory } from '../utils/doc-loader';
 import { prompter } from '../utils/prompter';
 
@@ -10,16 +10,18 @@ const topic: Metadata = {
   name: "adnd"
 };
 
-export default function setRoutes(app: Application, chromaClient: ChromaClient, llamaClient: any): void {
+export default function setRoutes(app: Application, chromaClient: ChromaClient): void {
   app.get('/healthcheck', (request, reply) => {
-    reply.send(true);
+    reply.type("application/json").status(200).send(true);
   });
 
   app.get('/reset', async (request, reply, next) => {
     try {
-      reply.status(200);
       await chromaClient.reset();
-      reply.send(true);
+      setTimeout(async() => {
+        await createCollections(chromaClient);
+        reply.type("application/json").status(200).send(true);
+      }, 3000);
     } catch (error) {
       next(error);
     }
@@ -29,7 +31,7 @@ export default function setRoutes(app: Application, chromaClient: ChromaClient, 
     try {
       reply.type("application/json");
       const response = await getCollections(chromaClient);
-      reply.send(response);
+      reply.type("application/json").status(200).send(response);
     } catch (error) {
       next(error);
     }
@@ -38,9 +40,10 @@ export default function setRoutes(app: Application, chromaClient: ChromaClient, 
   app.get("/collection/:name", async(request, reply, next) => {
     try {
       const collection: any = await getCollectionByName(request.params.name, chromaClient);
-      const peek = collection?.peek({
+      const peek = await collection?.peek({
         limit: 1000
       });
+
       reply.type("application/json").status(200).send(peek);
     } catch (error) {
       next(error);
@@ -64,7 +67,6 @@ export default function setRoutes(app: Application, chromaClient: ChromaClient, 
       response.map((item) => {
         updateKnowledge(item.pageContent, topic, chromaClient);
       });
-
       reply.type("application/json").status(200).send(response);
     } catch (error) {
       next(error);
@@ -73,9 +75,9 @@ export default function setRoutes(app: Application, chromaClient: ChromaClient, 
 
   app.post("/query", async (request, reply, next) => {
     try {
-      const userQuery = request.body as string;
-      console.log(green(`Query: ${userQuery}`));
-      const response = await prompter(userQuery, chromaClient, llamaClient);
+      const userQuery = request.body.query as string;
+      console.log(bgBlue(`Query: ${userQuery}`));
+      const response = await prompter(userQuery, chromaClient);
       reply.type("application/json").status(200).send(response);
     } catch (error) {
       next(error);

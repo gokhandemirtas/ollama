@@ -1,14 +1,16 @@
 import { Component, OnInit, signal } from '@angular/core';
+import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 
 import { CommonModule } from '@angular/common';
 import { LlamaService } from '../llama.service';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
+import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
+import { MatInputModule } from '@angular/material/input';
 import { MatListModule } from '@angular/material/list';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
-import { ReactiveFormsModule } from '@angular/forms';
 import { take } from 'rxjs';
 
 @Component({
@@ -22,7 +24,9 @@ import { take } from 'rxjs';
       MatProgressBarModule,
       MatListModule,
       MatIconModule,
-      MatSnackBarModule
+      MatSnackBarModule,
+      MatFormFieldModule,
+      MatInputModule
     ],
     templateUrl: './management.component.html',
     styleUrl: './management.component.scss'
@@ -33,10 +37,19 @@ export class ManagementComponent implements OnInit {
   collections = signal<Array<any>>([]);
   isWaiting = signal(false);
 
+  fileForm = new FormGroup({
+    category: new FormControl(null, [Validators.required, Validators.minLength(3), Validators.maxLength(20)]),
+    metadata: new FormControl(null, [Validators.required, Validators.minLength(10), Validators.maxLength(200)]),
+  });
+
+  selectedFile: File | null = null;
+
   fetchCollections() {
     this.isWaiting.set(true);
     this.service.getCollections().pipe(take(1)).subscribe((collections) => {
       this.collections.set(collections);
+      this.isWaiting.set(false);
+    }, () => {
       this.isWaiting.set(false);
     });
   }
@@ -72,14 +85,25 @@ export class ManagementComponent implements OnInit {
     });
   }
 
-  loadDocs() {
-    this.isWaiting.set(true);
-    this.service.loadDocs().pipe(take(1)).subscribe(() => {
+  onFileSelected(event: any) {
+    this.selectedFile = event.target.files[0];
+    console.log(event.target.files[0])
+  }
+
+  upload() {
+    // this.isWaiting.set(true);
+    const values = this.fileForm.value;
+
+    const uploadData = new FormData();
+    /* uploadData.append('file', this.selectedFile!, this.selectedFile!.name); */
+    console.log(this.selectedFile)
+
+    /* this.service.upload(file, category, metadata).pipe(take(1)).subscribe(() => {
       this.isWaiting.set(false);
-      this.snackbar.open(`Loaded docs from bucket successfully`, 'Dismiss', { duration: 1000 });
+      this.snackbar.open(`Uploaded file successfully`, 'Dismiss', { duration: 1000 });
     },() => {
       this.isWaiting.set(false);
-    });
+    }); */
   }
 
   ngOnInit(): void {

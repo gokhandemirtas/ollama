@@ -5,6 +5,7 @@
     <mat-card-header>
       <mat-card-title>
         Collections
+        <mat-icon (click)="fetchCollections()">restart_alt</mat-icon>
       </mat-card-title>
     </mat-card-header>
     <mat-card-content>
@@ -14,18 +15,48 @@
             <mat-icon matListItemIcon>folder</mat-icon>
             <h6 matListItemTitle>{{ collection.name }}</h6>
             <p matListItemLine>{{ collection.database }}, {{ collection.metadata }}</p>
-            <a (click)="deleteCollection(collection.name)" class="delete-item">
-              <mat-icon>delete</mat-icon>
-            </a>
+            <nav class="collection-actions">
+              <a (click)="deleteCollection(collection.name)">
+                <mat-icon>delete</mat-icon>
+              </a>
+              <a (click)="getCollection(collection.name)">
+                <mat-icon>analytics</mat-icon>
+              </a>
+            </nav>
           </mat-list-item>
         }
      </mat-list>
     </mat-card-content>
     <mat-card-actions align="end">
-      <button (click)="getCollection('chat-history')" mat-stroked-button color="warn" [disabled]="isWaiting()">Get knowledge base</button>
       <button (click)="reset()" mat-stroked-button color="warn" [disabled]="isWaiting()">Reset store</button>
-      <button (click)="fetchCollections()" mat-stroked-button color="primary">Get collections</button>
-      <button (click)="loadDocs()" mat-stroked-button color="warn">Load from bucket</button>
     </mat-card-actions>
+  </mat-card>
+</section>
+<section class="card-container">
+  <mat-card appearance="outlined">
+    <mat-card-header>
+      <mat-card-title>
+        Upload documents
+      </mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <form [formGroup]="fileForm">
+        <input type="file" required accept=".pdf" (change)="onFileSelected($event)"/>
+        <div>
+          <mat-form-field>
+            <mat-label>Category</mat-label>
+            <input type="text" matInput formControlName="category" name="category" required/>
+          </mat-form-field>
+        </div>
+        <div>
+          <mat-form-field>
+            <mat-label>Metadata</mat-label>
+            <textarea matInput formControlName="metadata" name="metadata" required></textarea>
+          </mat-form-field>
+        </div>
+      </form>
+
+      <button (click)="upload()" mat-stroked-button color="warn" [disabled]="isWaiting()">Upload</button>
+    </mat-card-content>
   </mat-card>
 </section>

@@ -2,17 +2,18 @@ import { getCollectionByName, updateChatHistory } from "./database";
 import { getSystemPrompt, getUserPrompt } from "./prompts";
 
 import { ChromaClient } from "chromadb";
+import ollama from "ollama";
 
-export async function prompter(userQuery: string, chromaClient: ChromaClient, llamaClient: any, model = process.env.LLM_MODEL!) {
+export async function prompter(userQuery: string, chromaClient: ChromaClient, model = process.env.LLM_MODEL!) {
   try {
     const knowledgeCollection = await getCollectionByName(process.env.KNOWLEDGE_COLLECTION!, chromaClient);
-    const knowledge = await knowledgeCollection!.query({
+    const knowledge = await (knowledgeCollection as any).query({
       queryTexts: [userQuery],
       nResults: 30,
     });
 
-    const chatHistoryCollection = await getCollectionByName(process.env.KNOWLEDGE_COLLECTION!, chromaClient);
-    const chatHistoryResponse = await chatHistoryCollection!.peek({
+    const chatHistoryCollection = await getCollectionByName(process.env.CHAT_HISTORY_COLLECTION!, chromaClient);
+    const chatHistoryResponse = await (chatHistoryCollection as any).peek({
       limit: 50,
     });
     const chatHistory = chatHistoryResponse.documents && Array.isArray(chatHistoryResponse.documents)
@@ -25,7 +26,7 @@ export async function prompter(userQuery: string, chromaClient: ChromaClient, ll
       chatHistory
     );
 
-    const llamaResponse = await llamaClient.chat({
+    const llamaResponse = await ollama.chat({
       model,
       messages: [
         { role: "system", content: getSystemPrompt() },
@@ -34,10 +35,11 @@ export async function prompter(userQuery: string, chromaClient: ChromaClient, ll
       ],
     });
 
-    // Update chat history with the user query
     updateChatHistory("assistant", llamaResponse.message.content, chromaClient);
     updateChatHistory("user", userQuery ?? "No previous questions.", chromaClient);
+
+    return Promise.resolve(llamaResponse);
   } catch (error) {
-    return error;
+    return Promise.reject(error);
   }
 }

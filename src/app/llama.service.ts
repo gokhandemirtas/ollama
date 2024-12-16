@@ -14,7 +14,9 @@ export class LlamaService {
   }
 
   query(query: string): Observable<GenerateResponse> {
-    return this.http.post<GenerateResponse>(`${this.environment.apiUrl}/query`, query);
+    return this.http.post<GenerateResponse>(`${this.environment.apiUrl}/query`, {
+      query
+    });
   }
 
   getCollections(): Observable<Array<any>> {
@@ -33,8 +35,8 @@ export class LlamaService {
     return this.http.get(`${this.environment.apiUrl}/reset`);
   }
 
-  loadDocs(): Observable<any> {
-    return this.http.get(`${this.environment.apiUrl}/loaddocs`);
+  upload(payload: any): Observable<any> {
+    return this.http.post(`${this.environment.apiUrl}/upload`, payload);
   }
 
 }

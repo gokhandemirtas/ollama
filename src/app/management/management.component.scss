@@ -15,14 +15,18 @@
     display: none !important;
   }
 
-  .delete-item {
+  .collection-actions {
     position: absolute;
     top: 8px;
     right: 8px;
-    cursor: pointer;
 
-    &:hover {
-      color: palevioletred;
+    a {
+      cursor: pointer;
+      margin-left: 8px;
+
+      &:hover {
+        color: palevioletred;
+      }
     }
   }
 }

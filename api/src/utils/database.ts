@@ -16,9 +16,13 @@ export async function getCollections(chromaClient: ChromaClient) {
 }
 
 export async function deleteCollection(name: string, chromaClient: ChromaClient) {
-  return chromaClient.deleteCollection({
-    name
-  })
+  try {
+    return chromaClient.deleteCollection({
+      name
+    })
+  } catch (error) {
+    return error;
+  }
 }
 
 export async function createCollections(chromaClient: ChromaClient) {
@@ -53,7 +57,7 @@ export async function getCollectionByName(name: string, chromaClient: ChromaClie
 export async function updateKnowledge(content: string, metadata: Metadata, chromaClient: ChromaClient) {
   try {
     const knowledgeCollection = await getCollectionByName(process.env['KNOWLEDGE_COLLECTION']!, chromaClient) as any;
-    knowledgeCollection?.upsert({
+    knowledgeCollection.upsert({
       documents: [content],
       ids: [uniqueId('llm')],
       metadatas: [metadata]
@@ -69,7 +73,7 @@ export async function updateChatHistory(role: string, content: string, chromaCli
   try {
     const chatHistoryCollection = await getCollectionByName(process.env['CHAT_HISTORY_COLLECTION']!, chromaClient) as any;
     if (role && content) {
-      chatHistoryCollection?.upsert({
+      chatHistoryCollection.upsert({
         documents: [content],
         ids: [uniqueId(role)],
         metadatas: [{ role, timestamp: new Date().toISOString() }],
