@@ -4,7 +4,7 @@ import { ChromaClient } from "chromadb";
 import ErrorHandler from "./utils/error-handler";
 import Logger from "./utils/logger";
 import cors from "cors";
-import { createCollections } from "./utils/database";
+import { createCollections } from "./routes/admin/management/database";
 import express from "express";
 import fileUpload from "express-fileupload";
 import { json } from "body-parser";

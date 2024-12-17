@@ -1,4 +1,4 @@
-import { getCollectionByName, updateChatHistory } from "./database";
+import { getCollectionByName, updateChatHistory } from "../admin/management/database";
 import { getSystemPrompt, getUserPrompt } from "./prompts";
 
 import { ChromaClient } from "chromadb";
