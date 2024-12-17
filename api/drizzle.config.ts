@@ -3,10 +3,10 @@ import { config } from 'dotenv';
 config();
 
 export default {
-  schema: "./src/core/schema.ts",
+  schema: "./src/core/schemas/index.ts",
   out: "./src/core/migrations",
-  driver: "pg",
+  dialect: "postgresql",
   dbCredentials: {
     connectionString: process.env.DATABASE_URL,
   },
-};
+} as const;
