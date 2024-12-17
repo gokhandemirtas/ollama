@@ -8,9 +8,9 @@ import { CSVLoader } from "@langchain/community/document_loaders/fs/csv";
 import { DirectoryLoader } from "langchain/document_loaders/fs/directory";
 import { PDFLoader } from "@langchain/community/document_loaders/fs/pdf";
 import { TextLoader } from "langchain/document_loaders/fs/text";
-import { updateKnowledge } from "./database";
+import { updateKnowledge } from "../management/crud";
 
-export async function loadDirectory(path = process.env.DOC_BUCKET!, chromaClient: ChromaClient, metadatas: Array<Metadata>) {
+export async function loadDirectory(path = process.env.DOC_BUCKET!, metadatas: Array<Metadata>) {
   try {
     const loader = new DirectoryLoader(
       path,
@@ -24,7 +24,7 @@ export async function loadDirectory(path = process.env.DOC_BUCKET!, chromaClient
     );
     const documents = await loader.load();
     documents.map((item) => {
-      updateKnowledge(item.pageContent, metadatas, chromaClient);
+      updateKnowledge(item.pageContent, metadatas);
     });
     return Promise.resolve(documents)
   } catch (error) {

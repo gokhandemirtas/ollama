@@ -1,16 +1,15 @@
-import { createCollections, deleteCollection, getCollectionByName, getCollections } from "./database";
+import { deleteCollection, getCollections, getTable } from "./crud";
 
 import { Application } from "express";
-import { ChromaClient } from "chromadb";
 
-export default function managementRoutes(app: Application, chromaClient: ChromaClient): void {
+export default function managementRoutes(app: Application): void {
   app.get('/reset', async (request, reply, next) => {
     try {
-      await chromaClient.reset();
+/*       await chromaClient.reset();
       setTimeout(async() => {
         await createCollections(chromaClient);
         reply.type("application/json").status(200).send(true);
-      }, 3000);
+      }, 3000); */
     } catch (error) {
       next(error);
     }
@@ -19,7 +18,7 @@ export default function managementRoutes(app: Application, chromaClient: ChromaC
   app.get("/collections", async(request, reply, next) => {
     try {
       reply.type("application/json");
-      const response = await getCollections(chromaClient);
+      const response = await getCollections();
       reply.type("application/json").status(200).send(response);
     } catch (error) {
       next(error);
@@ -28,7 +27,7 @@ export default function managementRoutes(app: Application, chromaClient: ChromaC
 
   app.get("/collection/:name", async(request, reply, next) => {
     try {
-      const collection: any = await getCollectionByName(request.params.name, chromaClient);
+      const collection: any = await getTable(request.params.name);
       const peek = await collection?.peek({
         limit: 1000
       });
@@ -43,7 +42,7 @@ export default function managementRoutes(app: Application, chromaClient: ChromaC
     console.log(request.params.name);
     try {
       const name: any = request.params.name;
-      const response = await deleteCollection(name, chromaClient);
+      const response = await deleteCollection(name);
       reply.type("application/json").status(200).send(response);
     } catch (error) {
       next(error);

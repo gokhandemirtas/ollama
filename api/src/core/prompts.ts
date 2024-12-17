@@ -1,6 +1,6 @@
-export function getSystemPrompt() {
+export function getSystemPrompt(topic = 'role playing game Dungeons and Dragons') {
   return `
-    You are an expert and helpful assistant on role playing game Dungeons and Dragons.
+    You are an expert and helpful assistant on ${topic}.
   `
 }
 
@@ -19,8 +19,3 @@ export function getUserPrompt(question: string, knowledge: string, chatHistory: 
     "${question}"
   `;
 }
-
-export const modelFile = `
-  FROM llama3.1
-  SYSTEM "You are mario from super mario bros."
-`
