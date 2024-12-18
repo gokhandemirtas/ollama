@@ -1,40 +1,46 @@
+import { conversationSchema, knowledgeSchema } from "../../core/schemas";
+import { desc, l2Distance } from "drizzle-orm";
 import { getSystemPrompt, getUserPrompt } from "../../core/prompts";
 
 import { db } from "../../core/db";
 import getEmbedding from "../../core/embedding";
 import ollama from "ollama";
+import { updateChatHistory } from "../admin/management/crud";
 
-export async function prompter(userQuery: string, model: string) {
+export async function prompter(userQuery: string, llmModel: string, embedderModel: string) {
   try {
-    const response = await getEmbedding(userQuery, model);
+    const response = await getEmbedding(userQuery, embedderModel);
     const embedding = response.embedding;
 
-    const knowledge = await db.execute(
-      `SELECT id, content, metadata ${embedding} <-> $1 as similarity
-      FROM ${process.env.TABLE_KNOWLEDGE!}
-      ORDER BY similarity
-      LIMIT 30`
-    );
+    if (!embedding || !Array.isArray(embedding)) {
+      return Promise.reject('Embedding invalid');
+    }
 
-    const chatHistory: any = await db.execute(`
-      SELECT question, answer, timestamp
-      FROM ${process.env.TABLE_CONVERSATIONS!}
-      WHERE userId = "aaaa-bbbb-cccc-dddd"
-      ORDER BY timestamp DESC
-      LIMIT 30
-    `);
+    if (embedding && embedding.length !== 768 ) {
+      return Promise.reject('Embedding dimensions does not match the schema');
+    }
+
+    const knowledge = await db.select().from(knowledgeSchema)
+      .orderBy(l2Distance(knowledgeSchema.embedding, embedding))
+      .limit(30);
+
+    const chatHistory: any = await db.select().from(conversationSchema)
+      .orderBy(desc(conversationSchema.timestamp))
+      .limit(30);
 
     const mapped = chatHistory ? chatHistory.map((doc: any) => `[${doc?.metadata?.role}] ${doc?.message?.content}`).join("\n")
       : "No previous conversation available.";
 
     const userPrompt = getUserPrompt(
       userQuery,
-      [knowledge].join("\n"),
+      knowledge.map((item) => item.content).join("\n"),
       mapped
     );
 
+    console.log(chatHistory);
+
     const llamaResponse = await ollama.chat({
-      model,
+      model: llmModel,
       messages: [
         { role: "system", content: getSystemPrompt() },
         { role: "user", content: userPrompt },
@@ -42,10 +48,8 @@ export async function prompter(userQuery: string, model: string) {
       ],
     });
 
-    /*
-      updateChatHistory("assistant", llamaResponse.message.content);
-      updateChatHistory("user", userQuery ?? "No previous questions.");
-    */
+    await updateChatHistory("assistant", llamaResponse.message.content);
+    await updateChatHistory("user", userQuery ?? "No previous questions.");
 
     return Promise.resolve(llamaResponse);
   } catch (error) {

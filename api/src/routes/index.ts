@@ -1,5 +1,4 @@
 import { Application } from 'express';
-import { ChromaClient } from 'chromadb';
 import adminRoutes from './admin';
 import userRoutes from './user';
 

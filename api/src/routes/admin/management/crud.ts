@@ -1,5 +1,6 @@
 import { Metadata } from "../../../core/models/metadata";
 import { bgMagenta } from "ansis";
+import { conversationSchema } from "../../../core/schemas";
 import { db } from "../../../core/db";
 import getEmbedding from "../../../core/embedding";
 import { knowledgeSchema } from "../../../core/schemas/knowledge-schema";
@@ -52,12 +53,12 @@ export async function updateKnowledge(content: string, metadatas: Array<Metadata
     const embedding = response.embedding;
 
     const insert = await db.insert(knowledgeSchema).values({
-      metadata: JSON.stringify(metadatas),
+      metadata: metadatas,
       content,
       embedding,
     });
 
-    console.log(bgMagenta(`[updateKnowledge] ${content}, ${metadatas}`));
+    console.log(bgMagenta(`[updateKnowledge] success`));
     return Promise.resolve(insert);
   } catch (error) {
     console.log(`[updateKnowledge]`, error);
@@ -67,17 +68,20 @@ export async function updateKnowledge(content: string, metadatas: Array<Metadata
 
 export async function updateChatHistory(role: string, content: string, ) {
   try {
-    const chatHistoryCollection = await getTable(process.env['CHAT_HISTORY_COLLECTION']!, chromaClient) as any;
     if (role && content) {
-      chatHistoryCollection.upsert({
-        documents: [content],
-        ids: [uniqueId(role)],
-        metadatas: [{ role, timestamp: new Date().toISOString() }],
-      });
+      await db.insert(conversationSchema).values({
+        role,
+        question: role === 'user' ? content : 'something',
+        answer: role === 'assistant' ? content : 'anything',
+        timestamp: new Date().toISOString(),
+        userId: 'A0EEBC99-9C0B-4EF8-BB6D-6BB9BD380A11',
+      })
+    } else {
+      return Promise.reject('Missing role or content');
     }
     return Promise.resolve(true);
   } catch (error) {
     console.log(`[updateChatHistory]`, error);
-    return error;
+    return Promise.reject(error);
   }
 }

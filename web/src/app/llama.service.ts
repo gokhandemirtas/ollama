@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Inject, Injectable } from '@angular/core';
 import { Environment } from '../environment/environment.model';
 import { ENVIRONMENT } from '../environment/environment.token';
-import { Observable, of } from 'rxjs';
+import { Observable } from 'rxjs';
 import { GenerateResponse } from 'ollama/browser';
 import { UploadRequestPayload } from './models/upload-request-payload';
 

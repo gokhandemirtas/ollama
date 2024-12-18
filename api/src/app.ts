@@ -10,7 +10,7 @@ import setRoutes from "./routes/index";
 
 const app = express();
 app.use(json());
-app.use(cors({ origin: process.env.CORS_ORIGIN! }));
+app.use(cors({ origin: process.env.WEB_APP_URL! }));
 app.use(fileUpload());
 setRoutes(app);
 app.use(Logger);

@@ -4,10 +4,7 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
-    "build": "ng build",
-    "lama:serve": "ollama serve",
-    "lama:run": "ollama run llama3.2",
-    "chroma": "cd chroma && docker compose up"
+    "build": "ng build"
   },
   "private": true,
   "type": "module",
@@ -31,7 +28,6 @@
     "@angular-devkit/build-angular": "^18.2.10",
     "@angular/cli": "^18.2.10",
     "@angular/compiler-cli": "^18.2.0",
-    "nodemon": "^3.1.9",
     "typescript": "~5.5.2"
   }
 }

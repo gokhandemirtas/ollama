@@ -1,5 +1,5 @@
 {
-  "id": "a4e002bb-efda-4c65-a191-f2a099ee5ebf",
+  "id": "9ed2c824-9364-4f02-b017-7092b511e3c4",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -59,9 +59,9 @@
         },
         "metadata": {
           "name": "metadata",
-          "type": "json",
+          "type": "jsonb",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false
         },
         "content": {
           "name": "content",
@@ -71,7 +71,7 @@
         },
         "embedding": {
           "name": "embedding",
-          "type": "vector(1536)",
+          "type": "vector(768)",
           "primaryKey": false,
           "notNull": false
         }
@@ -100,14 +100,14 @@
           "primaryKey": false,
           "notNull": true
         },
-        "string": {
-          "name": "string",
+        "role": {
+          "name": "role",
           "type": "text",
           "primaryKey": false,
           "notNull": true
         },
-        "content": {
-          "name": "content",
+        "question": {
+          "name": "question",
           "type": "text",
           "primaryKey": false,
           "notNull": true

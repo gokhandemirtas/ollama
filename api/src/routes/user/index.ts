@@ -7,7 +7,7 @@ export default function userRoutes(app: Application) {
     try {
       const userQuery = request.body.query as string;
       console.log(bgBlue(`Query: ${userQuery}`));
-      const response = await prompter(userQuery, process.env.EMBEDDER_MODEL!);
+      const response = await prompter(userQuery, process.env.LLM_MODEL!, process.env.EMBEDDER_MODEL!);
       reply.type("application/json").status(200).send(response);
     } catch (error) {
       next(error);

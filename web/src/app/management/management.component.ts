@@ -97,19 +97,20 @@ export class ManagementComponent implements OnInit {
   upload() {
     this.isWaiting.set(true);
     const { category, metadata } = this.fileForm.value as any;
+    this.fileForm.disable();
 
     this.service.upload({
       category,
       metadata,
     }, this.selectedFile!).pipe(take(1)).subscribe(() => {
+      this.snackbar.open(`Uploaded ${this.selectedFile?.name} successfully`, 'Dismiss', { duration: 1000 });
+    }, () => {
+      this.snackbar.open(`Failed to upload ${this.selectedFile?.name}`, 'Dismiss', { duration: 1000 });
+    }, () => {
       this.isWaiting.set(false);
-      this.snackbar.open(`Uploaded file successfully`, 'Dismiss', { duration: 1000 });
       this.fileForm.reset();
       this.selectedFile = null;
-    },() => {
-      this.isWaiting.set(false);
-      this.fileForm.reset();
-      this.selectedFile = null;
+      this.fileForm.enable();
     });
   }
 
