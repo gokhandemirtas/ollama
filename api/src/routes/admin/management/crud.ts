@@ -47,19 +47,23 @@ export async function getTable(name: string) {
   }
 }
 
-export async function updateKnowledge(content: string, metadatas: Array<Metadata>) {
+export async function updateKnowledge({content, metadatas, source, category}: {
+  content: string, metadatas: Array<Metadata>, source: string, category: string
+}) {
   try {
     const response = await getEmbedding(content);
     const embedding = response.embedding;
 
-    const insert = await db.insert(knowledgeSchema).values({
+    const inserted = await db.insert(knowledgeSchema).values({
       metadata: metadatas,
       content,
+      source,
+      category,
       embedding,
     });
 
     console.log(bgMagenta(`[updateKnowledge] success`));
-    return Promise.resolve(insert);
+    return Promise.resolve(inserted);
   } catch (error) {
     console.log(`[updateKnowledge]`, error);
     return error;
@@ -71,8 +75,7 @@ export async function updateChatHistory(role: string, content: string, ) {
     if (role && content) {
       await db.insert(conversationSchema).values({
         role,
-        question: role === 'user' ? content : 'something',
-        answer: role === 'assistant' ? content : 'anything',
+        content,
         timestamp: new Date().toISOString(),
         userId: 'A0EEBC99-9C0B-4EF8-BB6D-6BB9BD380A11',
       })

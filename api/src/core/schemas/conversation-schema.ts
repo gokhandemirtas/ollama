@@ -4,7 +4,6 @@ export const conversationSchema = pgTable("conversations", {
   id: serial("id").primaryKey(),
   timestamp: date("timestamp").notNull(),
   role: text("role").notNull(), /* Bunu nasil kisitlarim enum gibi ? */
-  question: text("question").notNull(),
-  answer: text("answer").notNull(),
+  content: text("content").notNull(),
   userId: uuid("userId").notNull(),
 });

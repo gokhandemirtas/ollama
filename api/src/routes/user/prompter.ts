@@ -28,16 +28,16 @@ export async function prompter(userQuery: string, llmModel: string, embedderMode
       .orderBy(desc(conversationSchema.timestamp))
       .limit(30);
 
-    const mapped = chatHistory ? chatHistory.map((doc: any) => `[${doc?.metadata?.role}] ${doc?.message?.content}`).join("\n")
+    const mapped = chatHistory ? chatHistory.map((item: any) => `[${item?.role}] ${item?.content}`).join("\n")
       : "No previous conversation available.";
+
+    console.log(knowledge.map((item) => item.content).join("\n"),);
 
     const userPrompt = getUserPrompt(
       userQuery,
       knowledge.map((item) => item.content).join("\n"),
       mapped
     );
-
-    console.log(chatHistory);
 
     const llamaResponse = await ollama.chat({
       model: llmModel,

@@ -1,5 +1,5 @@
 {
-  "id": "9ed2c824-9364-4f02-b017-7092b511e3c4",
+  "id": "de654973-f2ac-42b3-ad4b-f0e906c10c3b",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -69,6 +69,18 @@
           "primaryKey": false,
           "notNull": true
         },
+        "source": {
+          "name": "source",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "category": {
+          "name": "category",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
         "embedding": {
           "name": "embedding",
           "type": "vector(768)",
@@ -106,14 +118,8 @@
           "primaryKey": false,
           "notNull": true
         },
-        "question": {
-          "name": "question",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "answer": {
-          "name": "answer",
+        "content": {
+          "name": "content",
           "type": "text",
           "primaryKey": false,
           "notNull": true
