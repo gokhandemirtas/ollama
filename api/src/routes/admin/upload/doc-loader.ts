@@ -8,7 +8,6 @@ import { CSVLoader } from "@langchain/community/document_loaders/fs/csv";
 import { DirectoryLoader } from "langchain/document_loaders/fs/directory";
 import { PDFLoader } from "@langchain/community/document_loaders/fs/pdf";
 import { TextLoader } from "langchain/document_loaders/fs/text";
-import { updateKnowledge } from "../management/crud";
 
 export async function loadDirectory(path = process.env.DOC_BUCKET!) {
   try {
@@ -23,9 +22,8 @@ export async function loadDirectory(path = process.env.DOC_BUCKET!) {
       }
     );
     const documents = await loader.load();
-    const joined = documents.map(doc => doc.pageContent).join("\n");
     emptyFolder(path);
-    return Promise.resolve(joined)
+    return Promise.resolve(documents.map(doc => doc.pageContent));
   } catch (error) {
     return Promise.reject(error)
   }

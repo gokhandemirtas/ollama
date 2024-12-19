@@ -19,6 +19,7 @@ app.use(ErrorHandler);
 app.listen(process.env.API_PORT || 3000, async() => {
   console.table({
     API_PORT: process.env.API_PORT,
-    LLM_MODEL: process.env.LLM_MODEL
+    LLM_MODEL: process.env.LLM_MODEL,
+    EMBEDDER_MODEL: process.env.EMBEDDER_MODEL,
   });
 });

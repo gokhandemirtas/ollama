@@ -1,11 +1,9 @@
 import { Metadata } from "../../../core/models/metadata";
-import { bgMagenta } from "ansis";
 import { conversationSchema } from "../../../core/schemas";
 import { db } from "../../../core/db";
 import getEmbedding from "../../../core/embedding";
 import { knowledgeSchema } from "../../../core/schemas/knowledge-schema";
 import { sql } from "drizzle-orm";
-import { uniqueId } from "lodash-es";
 
 export async function getCollections() {
   try {
@@ -61,8 +59,6 @@ export async function updateKnowledge({content, metadatas, source, category}: {
       category,
       embedding,
     });
-
-    console.log(bgMagenta(`[updateKnowledge] success`));
     return Promise.resolve(inserted);
   } catch (error) {
     console.log(`[updateKnowledge]`, error);
@@ -76,7 +72,7 @@ export async function updateChatHistory(role: string, content: string, ) {
       await db.insert(conversationSchema).values({
         role,
         content,
-        timestamp: new Date().toISOString(),
+        timestamp: new Date(),
         userId: 'A0EEBC99-9C0B-4EF8-BB6D-6BB9BD380A11',
       })
     } else {

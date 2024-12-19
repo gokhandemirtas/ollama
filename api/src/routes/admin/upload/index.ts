@@ -10,13 +10,16 @@ export default function uploadRoutes(app: Application) {
         file.mv(`./${process.env.DOC_BUCKET!}/${request.body.name}`);
         const metadatas = request.body.metadata.split(',').map((name: string) => ({ name: name.replace(' ', '') })) ?? [];
         const knowledge = await loadDirectory(process.env.DOC_BUCKET!);
-        const updated = updateKnowledge({
-          content: knowledge,
-          metadatas,
-          source: request.body.name,
-          category: request.body.category
+        knowledge.map((content) => {
+          updateKnowledge({
+            content,
+            metadatas,
+            source: request.body.name,
+            category: request.body.category
+          });
         });
-        reply.type("application/json").status(200).send(updated);
+
+        reply.type("application/json").status(200).send(true);
       } else {
         next('Could not upload file to server');
       }
