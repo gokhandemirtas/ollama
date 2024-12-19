@@ -14,10 +14,12 @@
     "ky": "^1.7.4",
     "ollama": "^0.5.11",
     "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^7.0.2"
   },
   "devDependencies": {
     "@eslint/js": "^9.17.0",
+    "@tailwindcss/forms": "^0.5.9",
     "@types/react": "^18.3.17",
     "@types/react-dom": "^18.3.5",
     "@vitejs/plugin-react": "^4.3.4",
