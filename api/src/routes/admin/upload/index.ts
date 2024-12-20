@@ -1,11 +1,32 @@
+import { countDistinct, eq } from "drizzle-orm";
+
 import { Application } from "express";
 import { db } from "../../../core/db";
-import { eq } from "drizzle-orm";
 import { knowledgeSchema } from "../../../core/schemas";
 import { loadDirectory } from "./doc-loader";
 import { updateKnowledge } from "../management/crud";
 
 export default function uploadRoutes(app: Application) {
+  app.get('/uploads', async(request, reply, next) => {
+    try {
+      const uploads = await db.selectDistinctOn([knowledgeSchema.source])
+        .from(knowledgeSchema);
+
+
+      reply.type("application/json").status(200).send(uploads.map(({
+        source,
+        category,
+        metadata
+      }) => ({
+        source,
+        category,
+        metadata
+      })));
+    } catch (error) {
+      next(error);
+    }
+  });
+
   app.post('/upload', async(request, reply, next)  => {
     try {
       if (!!request.files) {

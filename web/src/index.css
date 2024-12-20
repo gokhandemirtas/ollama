@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 body, html {
-  @apply bg-gradient-to-br from-zinc-500 to-zinc-900 select-none;
+  @apply bg-gradient-to-br from-stone-600 to-stone-900 select-none;
   height: 100%;
   min-height: 100%;
 }
@@ -47,14 +47,14 @@ body, html {
 }
 
 .input-container {
-  @apply mb-4 border-b border-gray-300;
+  @apply mb-4;
 
   label {
     @apply block font-normal text-xs/8 text-gray-600 select-none;
   }
 
   textarea, input {
-    @apply w-full block font-normal text-xs/4  text-gray-900 border-gray-300 focus:outline-none focus:ring-teal-600 rounded-lg;
+    @apply w-full block font-normal text-xs/4  text-gray-900 border-gray-400 focus:outline-none focus:ring-stone-600 rounded-lg;
   }
 
   textarea {

@@ -29,7 +29,7 @@ export async function prompter(userQuery: string, llmModel: string) {
     const chatHistory: any = await db.select().from(conversationSchema)
       .where(eq(conversationSchema.role, "user"))
       .orderBy(desc(conversationSchema.timestamp))
-      .limit(5);
+      .limit(10);
 
     const flattenedChatHistory = chatHistory ? chatHistory.map((item: any) => `[${item?.role}] ${item?.content}`).join("\n")
       : "No previous conversation available.";

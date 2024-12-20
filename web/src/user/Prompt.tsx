@@ -2,7 +2,7 @@ import "./Prompt.css";
 
 import Markdown from "react-markdown";
 import { ProgressBar } from "../core/components/ProgressBar";
-import ky from "ky";
+import api from "../core/services/HttpClient";
 import { useState } from "react";
 
 export default function Prompt() {
@@ -15,7 +15,7 @@ export default function Prompt() {
     setInProgress(true);
     setAnswer('');
 
-    ky.post(`${import.meta.env.VITE_BACKEND_URL}/query`, {
+    api.post(`${import.meta.env.VITE_BACKEND_URL}/query`, {
         json: { query },
         timeout: import.meta.env.VITE_TIMEOUT
       })
