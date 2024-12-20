@@ -1,0 +1,10 @@
+.panel {
+  @apply  bg-gray-50 rounded-md p-4 w-6/12 border border-white shadow-lg shadow-zinc-900;
+}
+
+
+.answer-panel {
+  @apply panel mb-4 !bg-slate-200 text-xs/6 leading-snug text-gray-800 ;
+  max-height: calc(100vh - 20rem);
+  overflow-y: auto;
+}

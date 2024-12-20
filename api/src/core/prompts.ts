@@ -17,5 +17,7 @@ export function getUserPrompt(question: string, knowledge: string, chatHistory: 
     ---
     Based on the above, please answer the following question:
     "${question}"
+    ---
+    Return your answer in markdown format.
   `;
 }

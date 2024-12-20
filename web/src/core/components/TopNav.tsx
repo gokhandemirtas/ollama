@@ -1,16 +1,21 @@
+import "./TopNav.css";
+
+import { BeakerIcon } from "@heroicons/react/16/solid";
+
 export default function TopNav() {
   return (
     <>
-      <header className="bg-gray-900 text-white">
+      <header>
         <div className="container mx-auto">
           <nav className="flex items-center justify-between py-4">
-            <div>
-              <a href="/" className="text-xl font-bold">Logo</a>
-            </div>
-            <div>
-              <a href="/prompt" className="text-sm font-semibold mx-5 bg-slate-800">Prompt</a>
-              <a href="/admin" className="text-sm font-semibold mx-5">Admin</a>
-            </div>
+            <figure className="flex justify-between">
+              <BeakerIcon className="size-6 h-4" />
+              <figcaption className="text-sm/4 font-bold">LoreXplore</figcaption>
+            </figure>
+            <nav>
+              <a href="/prompt">Prompt</a>
+              <a href="/admin">Admin</a>
+            </nav>
           </nav>
         </div>
       </header>
