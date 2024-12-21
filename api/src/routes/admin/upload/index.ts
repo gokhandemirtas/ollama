@@ -7,6 +7,20 @@ import { loadDirectory } from "./doc-loader";
 import { updateKnowledge } from "../management/crud";
 
 export default function uploadRoutes(app: Application) {
+  app.delete('/upload', async(request, reply, next) => {
+    try {
+      await db.delete(knowledgeSchema)
+        .where(eq(knowledgeSchema.source, request.body.source));
+
+      const uploads = await db.selectDistinctOn([knowledgeSchema.source])
+        .from(knowledgeSchema);
+
+      reply.type("application/json").status(200).send(uploads);
+    } catch (error) {
+      next(error);
+    }
+  });
+
   app.get('/uploads', async(request, reply, next) => {
     try {
       const uploads = await db.selectDistinctOn([knowledgeSchema.source])

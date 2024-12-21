@@ -1,6 +1,8 @@
 import "./Prompt.css";
 
+import { ClipboardDocumentIcon } from "@heroicons/react/24/outline";
 import Markdown from "react-markdown";
+import { Panel } from "../core/components/Panel";
 import { ProgressBar } from "../core/components/ProgressBar";
 import api from "../core/services/HttpClient";
 import { useState } from "react";
@@ -9,6 +11,10 @@ export default function Prompt() {
   const [query, setQuery] = useState('');
   const [answer, setAnswer] = useState('');
   const [inProgress, setInProgress] = useState(false);
+
+  const copyToClipboard = () => {
+    navigator.clipboard.writeText(answer);
+  };
 
   const submitQuery = (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,12 +40,13 @@ export default function Prompt() {
     <>
       { inProgress && <ProgressBar /> }
       { answer &&
-        <aside className="answer-panel">
+        <Panel className="answer-panel mb-2 relative">
+          <ClipboardDocumentIcon className="size-7 bg-white border-4 absolute top-2 right-2  text-teal text-sm rounded-md cursor-pointer shadow-md shadow-slate-600" onClick={copyToClipboard}/>
           <Markdown>{ answer }</Markdown>
-        </aside>
+        </Panel>
       }
 
-      <aside className="panel">
+      <Panel>
         <form className={inProgress ? 'opacity-50 pointer-events-none' : ''}>
           <div className="col-span-full">
             <div className="input-container">
@@ -69,7 +76,7 @@ export default function Prompt() {
               </div>
           </div>
         </form>
-      </aside>
+      </Panel>
     </>
   )
 }

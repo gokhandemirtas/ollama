@@ -25,7 +25,7 @@ const ErrorBoundary: React.FC<Props> = ({ children }) => {
   }, []);
 
   if (hasError) {
-    return ('An error occurred');
+    return <>{children}</>;
   }
 
   return <>{children}</>;

@@ -1,7 +1,0 @@
-header {
-  @apply bg-gradient-to-r from-stone-700 to-stone-900 text-white;
-
-  a {
-    @apply text-sm font-medium hover:bg-stone-600 hover:shadow-md px-4 py-2 rounded-lg;
-  }
-}
