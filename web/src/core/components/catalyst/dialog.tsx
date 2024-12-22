@@ -1,7 +1,8 @@
 import * as Headless from '@headlessui/react'
-import clsx from 'clsx'
+
 import type React from 'react'
 import { Text } from './text'
+import clsx from 'clsx'
 
 const sizes = {
   xs: 'sm:max-w-xs',
@@ -16,7 +17,7 @@ const sizes = {
 }
 
 export function Dialog({
-  size = 'lg',
+  size = 'xl',
   className,
   children,
   ...props

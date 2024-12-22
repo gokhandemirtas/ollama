@@ -5,7 +5,11 @@ export default {
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
-    extend: {},
+    extend: {
+      zIndex: {
+        'top': '9999',
+      }
+    },
     fontFamily: {
       sans: ['Open sans'],
     },

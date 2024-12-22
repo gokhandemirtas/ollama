@@ -23,23 +23,6 @@ body, html {
 	box-sizing: border-box;
 }
 
-.input-container {
-  @apply mb-4;
-
-  label {
-    @apply block font-normal text-xs/8 text-gray-600 select-none;
-  }
-
-  textarea, input {
-    @apply w-full block font-normal text-xs/4  text-gray-900 border-gray-400 focus:outline-none focus:ring-stone-600 rounded-lg;
-  }
-
-  textarea {
-    @apply resize-none;
-  }
-}
-
-
-textarea {
-  field-sizing: content;
+.input-override {
+  @apply border !border-slate-400 rounded-lg my-2 !text-stone-900;
 }

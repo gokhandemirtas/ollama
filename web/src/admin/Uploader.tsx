@@ -1,6 +1,9 @@
-import { Panel } from "../../../core/components/Panel";
+import { Field, Fieldset, Input } from "@headlessui/react";
+
+import { ErrorBoundary } from "react-error-boundary";
+import { Panel } from "../core/components/Panel";
 import { PhotoIcon } from "@heroicons/react/16/solid";
-import api from "../../../core/services/HttpClient";
+import api from "../core/services/HttpClient";
 import { useState } from "react";
 
 export default function Uploader() {
@@ -76,9 +79,10 @@ export default function Uploader() {
 
   return (
     <>
+      <ErrorBoundary fallback={<div>Something went wrong</div>}>
       <Panel>
         <form>
-          <aside className="input-container">
+          <aside>
             <label htmlFor="cover-photo">Document upload</label>
             {file && (
               <p className="text-xs text-green-700 font-medium mb-2">
@@ -106,32 +110,28 @@ export default function Uploader() {
               </div>
             </div>
           </aside>
-          <aside className="input-container">
-            <input
-              type="text"
-              id="category"
-              name="category"
-              placeholder="Category"
-              onChange={handleInputChange}
-              className="input"
-              maxLength={30}
-              required
-              value={formState.category}
-            />
-          </aside>
-          <aside className="input-container">
-            <input
-              type="text"
-              id="metadata"
-              name="metadata"
-              placeholder="Metadata"
-              onChange={handleInputChange}
-              className="input"
-              maxLength={30}
-              required
-              value={formState.metadata}
-            />
-          </aside>
+          <Fieldset>
+            <Field>
+              <Input type="text"
+                maxLength={30} required
+                id="category"
+                name="category"
+                placeholder="Category"
+                onChange={handleInputChange}
+                className="input-override !color-scheme:dark"
+                value={formState.category}/>
+            </Field>
+            <Field>
+              <Input type="text"
+                maxLength={30} required
+                id="metadata"
+                name="metadata"
+                placeholder="Metadata"
+                onChange={handleInputChange}
+                className="input-override !color-scheme:dark"
+                value={formState.metadata}/>
+            </Field>
+          </Fieldset>
           { error &&
             <div className="bg-red-500 p-1 px-2 mb-4 text-yellow-50 text-xs/6 rounded-lg">{ error }</div>
           }
@@ -150,6 +150,7 @@ export default function Uploader() {
           </div>
         </form>
       </Panel>
+      </ErrorBoundary>
     </>
   );
 }

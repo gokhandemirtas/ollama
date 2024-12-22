@@ -12,9 +12,15 @@
 
 .in-progress {
   animation: spin 2.5s infinite linear;
-  background: conic-gradient(
+  background: linear-gradient(
+    to bottom,
+    oklch(0.1 0.2 240 / 0.95),
+    oklch(0.1 0.2 240 / 0.95)
+  )
+  padding-box,
+  conic-gradient(
     from var(--bg-angle) in oklch longer hue,
-    oklch(from rgb(1, 255, 1) l c h / 0.5) 0 0
+    oklch(0.85 0.37 0) 0 0
   )
   border-box;
   background-color: white !important;

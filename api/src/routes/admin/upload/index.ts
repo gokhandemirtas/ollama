@@ -21,11 +21,22 @@ export default function uploadRoutes(app: Application) {
     }
   });
 
+  app.get('/upload/:source', async(request, reply, next) => {
+    try {
+      const upload = await db.select()
+        .from(knowledgeSchema)
+        .where(eq(knowledgeSchema.source, request.params.source));
+
+      reply.type("application/json").status(200).send({ content: upload.map((item) => item.content).join('/n')});
+    } catch (error) {
+      next(error);
+    }
+  });
+
   app.get('/uploads', async(request, reply, next) => {
     try {
       const uploads = await db.selectDistinctOn([knowledgeSchema.source])
         .from(knowledgeSchema);
-
 
       reply.type("application/json").status(200).send(uploads.map(({
         source,
