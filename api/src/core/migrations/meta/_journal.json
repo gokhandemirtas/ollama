@@ -15,6 +15,20 @@
       "when": 1734601884812,
       "tag": "0001_public_captain_stacy",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1734944760838,
+      "tag": "0002_wakeful_scarecrow",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1734947287346,
+      "tag": "0003_easy_thunderbolts",
+      "breakpoints": true
     }
   ]
 }

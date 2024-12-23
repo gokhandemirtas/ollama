@@ -13,7 +13,7 @@
 .in-progress {
   animation: spin 2.5s infinite linear;
   background: linear-gradient(
-    to bottom,
+    to right,
     oklch(0.1 0.2 240 / 0.95),
     oklch(0.1 0.2 240 / 0.95)
   )

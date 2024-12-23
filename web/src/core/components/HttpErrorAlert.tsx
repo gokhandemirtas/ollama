@@ -9,7 +9,7 @@ export default function HttpErrorHandler() {
   useEffect(() => {
     function handler(event: any) {
       if (event.detail) {
-        setErrorText(event.detail);
+        setErrorText(event.detail ?? 'An error occurred while processing your request');
         setIsOpen(true);
       }
     }

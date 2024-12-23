@@ -1,6 +1,6 @@
 import ky from 'ky';
 
-function dispatchHttpErrorEvent(message: string) {
+function dispatchHttpErrorEvent(message: string | null) {
   const event = new CustomEvent('httpError', { detail: message });
   window.dispatchEvent(event);
 }
@@ -33,7 +33,7 @@ const api = ky.create({
     ],
     beforeRequest: [
       () => {
-        dispatchHttpErrorEvent('');
+        dispatchHttpErrorEvent(null);
         dispatchProgressEvent(true);
       },
     ],

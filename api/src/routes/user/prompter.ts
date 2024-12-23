@@ -1,7 +1,9 @@
+import { bgBlue, bgRed } from "ansis";
 import { conversationSchema, knowledgeSchema } from "../../core/schemas";
 import { cosineDistance, desc, eq, l2Distance } from "drizzle-orm";
 import { getSystemPrompt, getUserPrompt } from "../../core/prompts";
 
+import { CustomTools } from "../../core/tools";
 import { db } from "../../core/db";
 import getEmbedding from "../../core/embedding";
 import ollama from "ollama";
@@ -29,7 +31,7 @@ export async function prompter(userQuery: string, llmModel: string) {
     const chatHistory: any = await db.select().from(conversationSchema)
       .where(eq(conversationSchema.role, "user"))
       .orderBy(desc(conversationSchema.timestamp))
-      .limit(10);
+      .limit(100);
 
     const flattenedChatHistory = chatHistory ? chatHistory.map((item: any) => `[${item?.role}] ${item?.content}`).join("\n")
       : "No previous conversation available.";
@@ -40,19 +42,44 @@ export async function prompter(userQuery: string, llmModel: string) {
       flattenedChatHistory
     );
 
-    const llamaResponse = await ollama.chat({
+    const messages = [
+      { role: "system", content: getSystemPrompt() },
+      { role: "user", content: userPrompt },
+      { role: "user", content: `Previous conversation:\n${chatHistory}` },
+      { role: "user", content: `If user asks to save the character, call the saveCharacter function/tool.`}
+    ];
+
+    const primaryResponse = await ollama.chat({
       model: llmModel,
-      messages: [
-        { role: "system", content: getSystemPrompt() },
-        { role: "user", content: userPrompt },
-        { role: "user", content: `Previous conversation:\n${chatHistory}` },
-      ],
+      messages,
+      tools: [CustomTools.SaveCharacter]
     });
 
-    await updateChatHistory("assistant", llamaResponse.message.content);
+    const toolCalls = primaryResponse.message.tool_calls;
+
+    if (toolCalls && toolCalls.length > 0) {
+      for (const tool of toolCalls) {
+        try {
+          const content = await CustomTools.picker(tool.function.name)(tool.function.arguments);
+          console.log(bgBlue(`Tool: ${tool.function.name}, Tool output: ${content}`) );
+          messages.push({
+            role: 'tool',
+            content
+          });
+        } catch (error) {
+          console.log(bgRed(`Tool: ${tool.function.name}, Tool error: ${error}`));        }
+      }
+    }
+
+    const finalResponse = await ollama.chat({
+      model: llmModel,
+      messages
+  });
+
+    await updateChatHistory("assistant", finalResponse.message.content);
     await updateChatHistory("user", userQuery ?? "No previous questions.");
 
-    return Promise.resolve(llamaResponse);
+    return Promise.resolve(finalResponse);
   } catch (error) {
     return Promise.reject(error);
   }

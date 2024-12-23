@@ -33,8 +33,6 @@ export default function Prompt() {
       .then((res: any) => {
         console.log(res);
         setAnswer(res.message.content);
-      }).catch((err: any) => {
-        console.error(err);
       }).finally(() => {
         setInProgress(false);
         setQuery('');
@@ -52,11 +50,11 @@ export default function Prompt() {
       }
 
       <Panel>
-        <form className={inProgress ? 'opacity-60 pointer-events-none' : ''}>
+        <form className={inProgress ? 'opacity-90 pointer-events-none' : ''}>
           <Field>
             <Label className="text-xs/6 text-black">
               { !inProgress && 'Ask a question' }
-              { inProgress && <SnarkBar /> }
+              { inProgress && <SnarkBar className="text-emerald-600 font-bold" /> }
             </Label>
             <Textarea
               id="prompt"
