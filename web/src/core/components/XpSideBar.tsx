@@ -42,18 +42,10 @@ export default function XpSideBar() {
             <MagnifyingGlassIcon />
             <SidebarLabel>Lore</SidebarLabel>
           </SidebarItem>
-          <SidebarItem href="/inbox">
-            <InboxIcon />
-            <SidebarLabel>Inbox</SidebarLabel>
-          </SidebarItem>
         </SidebarSection>
       </SidebarHeader>
       <SidebarBody>
         <SidebarSection>
-          <SidebarItem href="/">
-            <HomeIcon />
-            <SidebarLabel>Home</SidebarLabel>
-          </SidebarItem>
           <SidebarItem href="/uploads">
             <Square2StackIcon />
             <SidebarLabel>Uploads</SidebarLabel>

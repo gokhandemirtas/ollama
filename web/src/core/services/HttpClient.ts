@@ -1,7 +1,12 @@
 import ky from 'ky';
 
-export function dispatchHttpErrorEvent(message: string) {
+function dispatchHttpErrorEvent(message: string) {
   const event = new CustomEvent('httpError', { detail: message });
+  window.dispatchEvent(event);
+}
+
+function dispatchProgressEvent(inProgress: boolean) {
+  const event = new CustomEvent('inProgress', { detail: inProgress });
   window.dispatchEvent(event);
 }
 
@@ -12,16 +17,29 @@ const api = ky.create({
         if (!response.ok) {
           const errorText = await response.text();
           dispatchHttpErrorEvent(errorText);
+          dispatchProgressEvent(false);
+        } else {
+          dispatchProgressEvent(false);
+          dispatchHttpErrorEvent('');
         }
       }
     ],
     beforeError: [
       error => {
         dispatchHttpErrorEvent(error.message);
+        dispatchProgressEvent(false);
         return error;
       }
-    ]
+    ],
+    beforeRequest: [
+      () => {
+        dispatchHttpErrorEvent('');
+        dispatchProgressEvent(true);
+      },
+    ],
   }
 });
 
 export default api;
+
+

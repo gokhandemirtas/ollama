@@ -1,5 +1,6 @@
 import { Route, BrowserRouter as Router, Routes } from 'react-router-dom';
 
+import HttpErrorHandler from './core/components/HttpErrorAlert';
 import { Layout } from './core/components/Layout';
 import ProgressBar from './core/components/ProgressBar';
 import Prompt from './user/Prompt';
@@ -9,6 +10,7 @@ import { Uploads } from './admin/Uploads';
 export default function App() {
   return (
     <>
+      <HttpErrorHandler />
       <ProgressBar />
       <Layout className="grid justify-items-center my-1">
         <Router>

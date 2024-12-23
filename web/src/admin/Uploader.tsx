@@ -1,6 +1,7 @@
 import { Field, Fieldset, Input } from "@headlessui/react";
 
 import { ErrorBoundary } from "react-error-boundary";
+import { ErrorBoundaryFallback } from "../core/components/ErrorBoundaryFallback";
 import { Panel } from "../core/components/Panel";
 import { PhotoIcon } from "@heroicons/react/16/solid";
 import api from "../core/services/HttpClient";
@@ -79,10 +80,10 @@ export default function Uploader() {
 
   return (
     <>
-      <ErrorBoundary fallback={<div>Something went wrong</div>}>
+      <ErrorBoundary fallback={<ErrorBoundaryFallback errorText=""/>}>
       <Panel>
         <form>
-          <aside>
+          <aside className="mb-2">
             <label htmlFor="cover-photo">Document upload</label>
             {file && (
               <p className="text-xs text-green-700 font-medium mb-2">
@@ -110,7 +111,7 @@ export default function Uploader() {
               </div>
             </div>
           </aside>
-          <Fieldset>
+          <Fieldset className="mb-2">
             <Field>
               <Input type="text"
                 maxLength={30} required
@@ -118,7 +119,7 @@ export default function Uploader() {
                 name="category"
                 placeholder="Category"
                 onChange={handleInputChange}
-                className="input-override !color-scheme:dark"
+                className="input-override w-full !color-scheme:dark"
                 value={formState.category}/>
             </Field>
             <Field>
@@ -128,7 +129,7 @@ export default function Uploader() {
                 name="metadata"
                 placeholder="Metadata"
                 onChange={handleInputChange}
-                className="input-override !color-scheme:dark"
+                className="input-override w-full !color-scheme:dark"
                 value={formState.metadata}/>
             </Field>
           </Fieldset>

@@ -1,13 +1,13 @@
 import "./Prompt.css";
 
-import { Field, Label } from "../core/components/catalyst/fieldset";
+import { Field, Label, Textarea } from "@headlessui/react";
 
 import { ClipboardDocumentIcon } from "@heroicons/react/24/outline";
 import { ErrorBoundary } from "react-error-boundary";
+import { ErrorBoundaryFallback } from "../core/components/ErrorBoundaryFallback";
 import Markdown from "react-markdown";
 import { Panel } from "../core/components/Panel";
 import { SnarkBar } from "../core/components/SnarkBar";
-import { Textarea } from "../core/components/catalyst/textarea";
 import api from "../core/services/HttpClient";
 import { useState } from "react";
 
@@ -42,8 +42,8 @@ export default function Prompt() {
   }
   return (
     <>
-      <ErrorBoundary fallback={<div>Something went wrong</div>}>
-      { inProgress && <SnarkBar /> }
+      <ErrorBoundary fallback={<ErrorBoundaryFallback errorText=""/>}>
+
       { answer &&
         <Panel className="answer-panel mb-2 relative">
           <ClipboardDocumentIcon className="size-7 bg-white border-4 absolute top-2 right-2  text-teal text-sm rounded-md cursor-pointer shadow-md shadow-slate-600" onClick={copyToClipboard}/>
@@ -52,17 +52,19 @@ export default function Prompt() {
       }
 
       <Panel>
-        <form className={inProgress ? 'opacity-50 pointer-events-none' : ''}>
+        <form className={inProgress ? 'opacity-60 pointer-events-none' : ''}>
           <Field>
-            <Label className="text-xs/6 text-black"></Label>
+            <Label className="text-xs/6 text-black">
+              { !inProgress && 'Ask a question' }
+              { inProgress && <SnarkBar /> }
+            </Label>
             <Textarea
               id="prompt"
               name="prompt"
               rows={3}
               onChange={(e) => setQuery(e.target.value)}
-              className="input-override"
+              className="input-override w-full"
               spellCheck="false" value={query}>
-                Ask something about Dungeons & Dragons
               </Textarea>
           </Field>
 

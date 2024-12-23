@@ -3,6 +3,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from ".
 import { useEffect, useState } from "react";
 
 import { ErrorBoundary } from "react-error-boundary";
+import { ErrorBoundaryFallback } from "../core/components/ErrorBoundaryFallback";
 import { Panel } from "../core/components/Panel";
 import { UploadsResponse } from "../core/models/uploads-response";
 import api from "../core/services/HttpClient";
@@ -10,41 +11,39 @@ import api from "../core/services/HttpClient";
 export function Uploads() {
   const [uploads, setUploads] = useState<Array<UploadsResponse>>([]);
   const [tableContent, setTableContent] = useState<string>('');
-  const [inProgress, setInProgress] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const getUploads = () => {
-    setInProgress(true);
+
     api.get(`${import.meta.env.VITE_BACKEND_URL}/uploads`, {
       timeout: import.meta.env.VITE_TIMEOUT
     }).json().then((res: any) => {
       setUploads(res);
     }).finally(() => {
-      setInProgress(false);
+
     });
   };
 
   const deleteTable = (source: string) => {
-    setInProgress(true);
     api.delete(`${import.meta.env.VITE_BACKEND_URL}/upload`, {
       timeout: import.meta.env.VITE_TIMEOUT,
       json: { source }
     }).json().then((res: any) => {
       setUploads(res);
     }).finally(() => {
-      setInProgress(false);
+
     });
   };
 
   const viewTable = (source: string) => {
-    setInProgress(true);
+
     api.get(`${import.meta.env.VITE_BACKEND_URL}/upload/${source}`, {
       timeout: import.meta.env.VITE_TIMEOUT
     }).json().then(({content}: any) => {
       setIsDialogOpen(true);
       setTableContent(content);
     }).finally(() => {
-      setInProgress(false);
+
     });
   };
 
@@ -54,7 +53,7 @@ export function Uploads() {
 
   return (
     <>
-      <ErrorBoundary fallback={<div>Something went wrong</div>}>
+      <ErrorBoundary fallback={<ErrorBoundaryFallback errorText=""/>}>
       <Panel className="mb-4">
         <Table striped dense>
           <TableHead>
@@ -77,6 +76,7 @@ export function Uploads() {
                 </TableCell>
               </TableRow>
             ))}
+            { uploads.length === 0 && <p className="text-xs/6 text-red-600">Could not load the uploads</p>}
           </TableBody>
         </Table>
       </Panel>
