@@ -1,0 +1,3 @@
+.panel {
+  @apply  bg-gray-50 rounded-md p-4 sm:w-10/12 md:w-full lg:w-8/12 border border-white shadow-md shadow-black;
+}
