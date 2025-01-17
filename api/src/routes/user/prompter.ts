@@ -52,10 +52,10 @@ export async function prompter(userQuery: string, llmModel: string) {
     const primaryResponse = await ollama.chat({
       model: llmModel,
       messages,
-      tools: [CustomTools.SaveCharacter]
+      /* tools: [CustomTools.SaveCharacter] */
     });
 
-    const toolCalls = primaryResponse.message.tool_calls;
+    /* const toolCalls = primaryResponse.message.tool_calls;
 
     if (toolCalls && toolCalls.length > 0) {
       for (const tool of toolCalls) {
@@ -74,12 +74,12 @@ export async function prompter(userQuery: string, llmModel: string) {
     const finalResponse = await ollama.chat({
       model: llmModel,
       messages
-  });
+    }); */
 
-    await updateChatHistory("assistant", finalResponse.message.content);
+    await updateChatHistory("assistant", primaryResponse.message.content);
     await updateChatHistory("user", userQuery ?? "No previous questions.");
 
-    return Promise.resolve(finalResponse);
+    return Promise.resolve(primaryResponse);
   } catch (error) {
     return Promise.reject(error);
   }
