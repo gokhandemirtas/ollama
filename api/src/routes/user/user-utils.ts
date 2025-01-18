@@ -11,4 +11,15 @@ export namespace User {
       return error;
     }
   }
+
+  export async function fetchConversations() {
+    try {
+      const conversations = await db.select().from(conversationSchema)
+        .orderBy(conversationSchema.timestamp)
+      return Promise.resolve(conversations);
+    } catch (error) {
+      console.log(`[fetchChatHistory]`, error);
+      return error;
+    }
+  }
 }

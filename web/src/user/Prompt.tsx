@@ -1,29 +1,49 @@
 import "./Prompt.css";
 
 import { Field, Label, Textarea } from "@headlessui/react";
+import { useEffect, useState } from "react";
 
-import { ClipboardDocumentIcon } from "@heroicons/react/24/outline";
+import Conversation from "./Conversation";
 import { ErrorBoundary } from "react-error-boundary";
 import { ErrorBoundaryFallback } from "../core/components/ErrorBoundaryFallback";
-import Markdown from "react-markdown";
+import IConversation from "../core/models/conversation";
 import { Panel } from "../core/components/Panel";
 import { SnarkBar } from "../core/components/SnarkBar";
 import api from "../core/services/HttpClient";
-import { useState } from "react";
 
 export default function Prompt() {
   const [query, setQuery] = useState('');
-  const [answer, setAnswer] = useState('');
+  const [conversations, setConversations] = useState<Array<IConversation>>([]);
   const [inProgress, setInProgress] = useState(false);
 
-  const copyToClipboard = () => {
-    navigator.clipboard.writeText(answer);
-  };
+  function clearChatHistory() {
+    api.get(`${import.meta.env.VITE_BACKEND_URL}/clear-chat-history`)
+      .json()
+      .then(() => {
+        setQuery('');
+      });
+  }
+
+  function updateConversation(question: string, answer: string) {
+    const timestamp = new Date().toISOString();
+    const userId = '';
+    const id = 1;
+    setConversations([...conversations, { role: 'user', content: question, timestamp, userId, id}]);
+    setConversations([...conversations, { role: 'assistant', content: answer, timestamp, userId, id}]);
+  }
+
+  useEffect(() => {
+    api.get(`${import.meta.env.VITE_BACKEND_URL}/conversations`)
+      .json()
+      .then((res: any) => {
+        console.log(res);
+        setConversations(res);
+      });
+  }, [setConversations]);
 
   const submitQuery = (e: React.FormEvent) => {
     e.preventDefault();
     setInProgress(true);
-    setAnswer('');
 
     api.post(`${import.meta.env.VITE_BACKEND_URL}/query`, {
         json: { query },
@@ -32,8 +52,10 @@ export default function Prompt() {
       .json()
       .then((res: any) => {
         console.log(res);
-        setAnswer(res.message.content);
+        const answer = res.message.content;
+        updateConversation(query, answer);
       }).finally(() => {
+
         setInProgress(false);
         setQuery('');
       });
@@ -41,15 +63,7 @@ export default function Prompt() {
   return (
     <>
       <ErrorBoundary fallback={<ErrorBoundaryFallback errorText=""/>}>
-
-      { answer &&
-        <Panel className="answer-panel mb-2 relative">
-          <ClipboardDocumentIcon className="size-7 bg-white border-4 absolute top-2 right-2  text-teal text-sm rounded-md cursor-pointer shadow-md shadow-slate-600" onClick={copyToClipboard}/>
-          <Markdown>{ answer }</Markdown>
-        </Panel>
-      }
-
-      <Panel>
+      <Panel className="mb-4">
         <form className={inProgress ? 'opacity-90 pointer-events-none' : ''}>
           <Field>
             <Label className="text-xs/6 text-black">
@@ -67,6 +81,7 @@ export default function Prompt() {
           </Field>
 
           <div>
+
             <button
               type="submit"
               className="primary-button mt-4 float-right"
@@ -74,9 +89,19 @@ export default function Prompt() {
               onClick={(e) => submitQuery(e)}>
               Query
             </button>
+            { conversations.length > 0 &&
+                <button onClick={clearChatHistory} className="outline-button mt-4 mr-4 float-right">
+                  Clear history
+                </button>
+            }
           </div>
         </form>
       </Panel>
+      { conversations &&
+        conversations.map((conversation, index) => (
+          <Conversation conversation={conversation} key={index} />
+        ))
+      }
       </ErrorBoundary>
     </>
   )

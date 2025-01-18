@@ -46,7 +46,6 @@ export async function prompter(userQuery: string, llmModel: string) {
       { role: "system", content: getSystemPrompt() },
       { role: "user", content: userPrompt },
       { role: "user", content: `Previous conversation:\n${chatHistory}` },
-      { role: "user", content: `If user asks to save the character, call the saveCharacter function/tool.`}
     ];
 
     const primaryResponse = await ollama.chat({
