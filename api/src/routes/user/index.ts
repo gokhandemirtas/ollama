@@ -16,9 +16,19 @@ export default function userRoutes(app: Application) {
     }
   });
 
-  app.get("/clear-chat-history", async (request, reply, next) => {
+  app.delete("/conversations", async (request, reply, next) => {
     try {
       await User.clearChatHistory();
+      reply.type("application/json").status(200).send(true);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.delete("/conversation/:id", async (request, reply, next) => {
+    try {
+      const conversationId = Number(request.params.id);
+      await User.deleteConversation(conversationId);
       reply.type("application/json").status(200).send(true);
     } catch (error) {
       next(error);
@@ -37,6 +47,25 @@ export default function userRoutes(app: Application) {
         return 0;
       });
       reply.type("application/json").status(200).send(sorted);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.get("/characters", async (request, reply, next) => {
+    try {
+      const characters: any = await User.fetchCharacters();
+      reply.type("application/json").status(200).send(characters);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.delete("/character/:id", async (request, reply, next) => {
+    try {
+      const characterId = Number(request.params.id);
+      await User.deleteCharacter(characterId);
+      reply.type("application/json").status(200).send();
     } catch (error) {
       next(error);
     }

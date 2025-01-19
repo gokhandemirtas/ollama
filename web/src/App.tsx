@@ -1,5 +1,6 @@
 import { Route, BrowserRouter as Router, Routes } from 'react-router-dom';
 
+import Characters from './characters/Characters';
 import HttpErrorHandler from './core/components/HttpErrorAlert';
 import { Layout } from './core/components/Layout';
 import ProgressBar from './core/components/ProgressBar';
@@ -18,6 +19,7 @@ export default function App() {
             <Route path="/prompt" element={<Prompt />} />
             <Route path="/uploads" element={<Uploads />} />
             <Route path="/new-upload" element={<Uploader />} />
+            <Route path="/characters" element={<Characters />} />
           </Routes>
         </Router>
       </Layout>

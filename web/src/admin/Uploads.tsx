@@ -76,9 +76,9 @@ export function Uploads() {
                 </TableCell>
               </TableRow>
             ))}
-            { uploads.length === 0 && <p className="text-xs/6 text-red-600">Could not load the uploads</p>}
           </TableBody>
         </Table>
+        { uploads.length === 0 && <p className="text-xs/6 text-red-600">Could not load the uploads</p>}
       </Panel>
 
       <Dialog open={isDialogOpen} onClose={setIsDialogOpen} className="!bg-gray-100">

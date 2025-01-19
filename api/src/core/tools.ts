@@ -1,10 +1,19 @@
+import { ICharacter } from "./models/character";
 import { Tool } from "ollama";
 import { characterSchema } from "./schemas/character-schema";
 import { db } from "./db";
 
-async function saveCharacter(char: any) {
-  console.log('this has been called: ', char);
-  return Promise.resolve('Character saved');
+async function saveCharacter(char: ICharacter) {
+  try {
+    const newCharacter = await db.insert(characterSchema).values({
+      ...char,
+      createdOn: new Date(),
+      userId: 'A0EEBC99-9C0B-4EF8-BB6D-6BB9BD380A11',
+    });
+    return Promise.resolve('Character saved successfully');
+  } catch (error) {
+    return Promise.reject(error);
+  }
 }
 
 export namespace CustomTools {
@@ -20,7 +29,7 @@ export namespace CustomTools {
     type: 'function',
     function: {
         name: 'saveCharacter',
-        description: 'Save the character',
+        description: 'Save the character when prompted by the user. Example prompt: "Save this character". Retrieve the details only from the chat history you have with the user.',
         parameters: {
           type: 'object',
           properties: {

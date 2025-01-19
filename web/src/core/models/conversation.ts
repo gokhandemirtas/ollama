@@ -4,4 +4,5 @@ export default interface IConversation {
   role: 'assistant' | 'user';
   timestamp: string;
   userId: string;
+  isSoftDeleted?: boolean;
 }

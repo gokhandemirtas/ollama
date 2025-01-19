@@ -3,6 +3,7 @@ import { Dropdown, DropdownButton, DropdownDivider, DropdownItem, DropdownLabel,
 import { Sidebar, SidebarBody, SidebarFooter, SidebarHeader, SidebarItem, SidebarLabel, SidebarSection, SidebarSpacer } from "./catalyst/sidebar";
 
 import { Avatar } from "./catalyst/avatar";
+import { BeakerIcon } from "@heroicons/react/24/solid";
 import Logo from '../../assets/logo.png';
 import MyAvatar from '../../assets/avatars/avatar1.png';
 
@@ -22,13 +23,9 @@ export default function XpSideBar() {
               <DropdownLabel>Settings</DropdownLabel>
             </DropdownItem>
             <DropdownDivider />
-            <DropdownItem href="/teams/1">
+            <DropdownItem href="/characters">
               <StarIcon />
               <DropdownLabel>My chars</DropdownLabel>
-            </DropdownItem>
-            <DropdownItem href="/teams/2">
-              <Avatar slot="icon" initials="WC" className="bg-purple-500 text-white" />
-              <DropdownLabel>Workcation</DropdownLabel>
             </DropdownItem>
             <DropdownDivider />
             <DropdownItem href="/teams/create">
@@ -46,6 +43,10 @@ export default function XpSideBar() {
       </SidebarHeader>
       <SidebarBody>
         <SidebarSection>
+          <SidebarItem href="/characters">
+            <BeakerIcon />
+            <SidebarLabel>My chars</SidebarLabel>
+          </SidebarItem>
           <SidebarItem href="/uploads">
             <Square2StackIcon />
             <SidebarLabel>Uploads</SidebarLabel>

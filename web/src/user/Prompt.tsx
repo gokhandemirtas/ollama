@@ -17,28 +17,33 @@ export default function Prompt() {
   const [inProgress, setInProgress] = useState(false);
 
   function clearChatHistory() {
-    api.get(`${import.meta.env.VITE_BACKEND_URL}/clear-chat-history`)
+    api.delete(`${import.meta.env.VITE_BACKEND_URL}/conversations`)
       .json()
       .then(() => {
         setQuery('');
       });
   }
 
-  function updateConversation(question: string, answer: string) {
-    const timestamp = new Date().toISOString();
-    const userId = '';
-    const id = 1;
-    setConversations([...conversations, { role: 'user', content: question, timestamp, userId, id}]);
-    setConversations([...conversations, { role: 'assistant', content: answer, timestamp, userId, id}]);
-  }
-
-  useEffect(() => {
+  function updateConversation() {
     api.get(`${import.meta.env.VITE_BACKEND_URL}/conversations`)
       .json()
       .then((res: any) => {
         console.log(res);
         setConversations(res);
       });
+  }
+
+  function getConversations() {
+    api.get(`${import.meta.env.VITE_BACKEND_URL}/conversations`)
+      .json()
+      .then((res: any) => {
+        console.log(res);
+        setConversations(res);
+      });
+  }
+
+  useEffect(() => {
+    getConversations();
   }, [setConversations]);
 
   const submitQuery = (e: React.FormEvent) => {
@@ -52,8 +57,7 @@ export default function Prompt() {
       .json()
       .then((res: any) => {
         console.log(res);
-        const answer = res.message.content;
-        updateConversation(query, answer);
+        updateConversation();
       }).finally(() => {
 
         setInProgress(false);
@@ -90,7 +94,8 @@ export default function Prompt() {
               Query
             </button>
             { conversations.length > 0 &&
-                <button onClick={clearChatHistory} className="outline-button mt-4 mr-4 float-right">
+                <button onClick={clearChatHistory} disabled={inProgress}
+                  className="outline-button mt-4 mr-4 float-right">
                   Clear history
                 </button>
             }
@@ -99,7 +104,7 @@ export default function Prompt() {
       </Panel>
       { conversations &&
         conversations.map((conversation, index) => (
-          <Conversation conversation={conversation} key={index} />
+          <Conversation conversation={conversation} callback={getConversations} key={index} />
         ))
       }
       </ErrorBoundary>
