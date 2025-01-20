@@ -6,7 +6,14 @@ import cors from "cors";
 import express from "express";
 import fileUpload from "express-fileupload";
 import { json } from "body-parser";
+import rateLimit from "express-rate-limit";
 import setRoutes from "./routes/index";
+
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // limit each IP to 100 requests per windowMs
+  message: 'Too many requests from this IP, please try again later.'
+});
 
 const app = express();
 app.use(json());
@@ -15,6 +22,7 @@ app.use(fileUpload());
 setRoutes(app);
 app.use(Logger);
 app.use(ErrorHandler);
+app.use(limiter);
 
 app.listen(process.env.API_PORT || 3000, async() => {
   console.table({

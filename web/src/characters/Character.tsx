@@ -8,9 +8,10 @@ import api from '../core/services/HttpClient';
 
 const portraits = import.meta.glob('../assets/portraits/*.png', { eager: true });
 
-export default function Character({ character, callback }: {
+export default function Character({ character, onDeletedHandler, onSelectedHandler }: {
   character: ICharacter;
-  callback: () => void;
+  onDeletedHandler: () => void;
+  onSelectedHandler: (character: ICharacter) => void;
 }) {
 
   const [portrait, setPortrait] = useState<string>('');
@@ -24,7 +25,7 @@ export default function Character({ character, callback }: {
 
   async function deleteChar() {
     await api.delete(`${import.meta.env.VITE_BACKEND_URL}/character/${character.id}`);
-    callback();
+    onDeletedHandler();
   }
 
   useEffect(() => {
@@ -32,7 +33,7 @@ export default function Character({ character, callback }: {
   }, [character]);
 
   return (
-    <div className="character-card relative">
+    <div className="character-card relative" onClick={() => onSelectedHandler(character)}>
       <img src={portrait} alt={`${character.race} ${character.class}`} className="w-full h-auto mx-auto" />
       {character && (
         <div className="p-2">

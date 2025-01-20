@@ -21,7 +21,7 @@ export namespace User {
       ;
       return Promise.resolve(true);
     } catch (error) {
-      console.log(`[clearChatHistory]`, error);
+      console.log(`[deleteConversation]`, error);
       return error;
     }
   }
@@ -53,7 +53,7 @@ export namespace User {
         .where(eq(characterSchema.id, characterId))
       return Promise.resolve(true);
     } catch (error) {
-      console.log(`[fetchCharacters]`, error);
+      console.log(`[deleteCharacter]`, error);
       return error;
     }
   }

@@ -1,6 +1,8 @@
 export function getSystemPrompt(topic = 'role playing game Dungeons and Dragons') {
   return `
     You are an expert and helpful assistant on ${topic}.
+    ---
+    If user asks to "Save this character", retrieve the character details only from the chat history you have with the user and call the "saveCharacter" tool. Do not execute the tool if the user does not ask to "Save this character".
   `
 }
 

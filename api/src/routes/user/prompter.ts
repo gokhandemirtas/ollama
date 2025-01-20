@@ -1,4 +1,4 @@
-import { bgBlue, bgRed } from "ansis";
+import { bgBlue, bgMagenta, bgRed } from "ansis";
 import { conversationSchema, knowledgeSchema } from "../../core/schemas";
 import { cosineDistance, desc, eq, l2Distance } from "drizzle-orm";
 import { getSystemPrompt, getUserPrompt } from "../../core/prompts";
@@ -51,18 +51,16 @@ export async function prompter(userQuery: string, llmModel: string) {
     const primaryResponse = await ollama.chat({
       model: llmModel,
       messages,
-      tools: [CustomTools.SaveCharacter]
+      tools: [CustomTools.SaveCharacter, CustomTools.RetrieveCharacters]
     });
 
     const toolCalls = primaryResponse.message.tool_calls;
-
-    console.log(`toolCalls: ${toolCalls}`);
 
     if (toolCalls && toolCalls.length > 0) {
       for (const tool of toolCalls) {
         try {
           const content = await CustomTools.picker(tool.function.name)(tool.function.arguments);
-          console.log(bgBlue(`Tool: ${tool.function.name}, Tool output: ${content}`) );
+          console.log(bgMagenta(`Tool: ${tool.function.name}, Tool output: ${content}`) );
           messages.push({
             role: 'tool',
             content

@@ -34,4 +34,11 @@ export const PORTRAIT_REGISTRY: {
   "halfling-monk": "halfling-monk.png",
   "halfling-paladin": "halfling-paladin.png",
   "halfling-ranger": "halfling-ranger.png",
+  "human-barbarian": "human-barbarian.png",
+  "human-bard": "human-bard.png",
+  "human-cleric": "human-cleric.png",
+  "human-druid": "human-druid.png",
+  "human-fighter": "human-fighter.png",
+  "human-monk": "human-monk.png",
+  "human-paladin": "human-paladin.png",
 }
