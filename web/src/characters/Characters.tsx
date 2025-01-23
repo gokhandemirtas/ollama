@@ -27,7 +27,7 @@ export default function Characters() {
   return (
     <>
       <ErrorBoundary fallback={<ErrorBoundaryFallback errorText="Can not load characters"/>}>
-        <div className="h-full flex justify-center items-center gap-8">
+        <div className="h-full w-full flex flex-wrap justify-center items-center gap-8">
           { characters.length === 0 && <p className="text-2xl text-gray-500 dark:text-gray-400">No characters found</p> }
           {
             characters.length > 0 &&

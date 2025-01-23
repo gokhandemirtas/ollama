@@ -5,7 +5,9 @@
 	},
 	"formatter": {
 		"enabled": true,
-		"lineWidth": 200
+		"lineWidth": 200,
+    "indentWidth": 2,
+    "indentStyle": "space"
 	},
 	"linter": {
 		"enabled": true,

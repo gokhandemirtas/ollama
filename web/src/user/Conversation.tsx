@@ -48,7 +48,7 @@ export default function Conversation({conversation, callback }: {
               </span>
             </div>
             <aside className="overflow-hidden overflow-x-auto">
-              <Markdown className="text-xs font-normal py-2.5 text-gray-900 dark:text-white">
+              <Markdown className="text-xs font-normal py-2.5 text-gray-900 dark:text-white !text-wrap !break-words" allowedElements={['p']}>
                 { conversation.content }
               </Markdown>
             </aside>

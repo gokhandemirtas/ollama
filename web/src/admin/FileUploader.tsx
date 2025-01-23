@@ -7,7 +7,7 @@ import { PhotoIcon } from "@heroicons/react/16/solid";
 import api from "../core/services/HttpClient";
 import { useState } from "react";
 
-export default function Uploader() {
+export default function FileUploader() {
   const [inProgress, setInProgress] = useState(false);
   const [file, setFile] = useState<File | null>(null);
   const [uploadState, setUploadState] = useState("");

@@ -2,12 +2,14 @@ import { ICharacter } from "./models/character";
 import { Tool } from "ollama";
 import { characterSchema } from "./schemas/character-schema";
 import { db } from "./db";
+import { log } from "./logger";
 
 async function retrieveCharacters() {
 	try {
 		const characters = await db.select().from(characterSchema);
 		return Promise.resolve(characters);
 	} catch (error) {
+    log.error(`[retrieveCharacters] ${error}`);
 		return Promise.reject(error);
 	}
 }
@@ -21,6 +23,7 @@ async function saveCharacter(char: ICharacter) {
 		});
 		return Promise.resolve("Character saved successfully");
 	} catch (error) {
+    log.error(`[saveCharacter] ${error}`);
 		return Promise.reject(error);
 	}
 }
@@ -41,7 +44,7 @@ export namespace CustomTools {
 		type: "function",
 		function: {
 			name: "saveCharacter",
-			description: "This is a tool to save a character to the database",
+			description: "This tool will only be called when user asks to save a character",
 			parameters: {
 				type: "object",
 				properties: {

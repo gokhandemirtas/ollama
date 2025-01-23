@@ -4,10 +4,14 @@ import { Sidebar, SidebarBody, SidebarFooter, SidebarHeader, SidebarItem, Sideba
 
 import { Avatar } from "./catalyst/avatar";
 import { BeakerIcon } from "@heroicons/react/24/solid";
+import { CircleStackIcon } from "@heroicons/react/24/solid";
 import Logo from '../../assets/logo.png';
 import MyAvatar from '../../assets/avatars/avatar1.png';
+import { VariableIcon } from "@heroicons/react/24/solid";
+import useHealthCheckStore from "../store/health-check.store";
 
 export default function XpSideBar() {
+  const { healthCheckResults } = useHealthCheckStore();
   return (
     <Sidebar>
       <SidebarHeader>
@@ -65,6 +69,14 @@ export default function XpSideBar() {
           <SidebarItem href="/changelog">
             <SparklesIcon />
             <SidebarLabel>Changelog</SidebarLabel>
+          </SidebarItem>
+          <SidebarItem>
+            <CircleStackIcon/>
+            <SidebarLabel  className={healthCheckResults.isDbOnline ? "!text-green-500" : "!text-red-500 animate-pulse"} >DB</SidebarLabel>
+          </SidebarItem>
+          <SidebarItem>
+            <VariableIcon/>
+            <SidebarLabel className={healthCheckResults.isLLmOnline ? "!text-green-500" : "!text-red-500 animate-pulse"} >LM</SidebarLabel>
           </SidebarItem>
         </SidebarSection>
       </SidebarBody>

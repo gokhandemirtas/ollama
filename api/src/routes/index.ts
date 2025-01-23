@@ -1,13 +1,10 @@
 import { Application } from 'express';
 import adminRoutes from './admin';
+import healthCheckRoutes from './healthcheck';
 import userRoutes from './user';
 
 export default function setRoutes(app: Application): void {
-  app.get('/healthcheck', (request, reply) => {
-    reply.type("application/json").status(200).send(true);
-  });
-
   adminRoutes(app);
   userRoutes(app);
-
+  healthCheckRoutes(app);
 }

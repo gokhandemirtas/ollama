@@ -1,5 +1,5 @@
+import { asc, desc, eq } from "drizzle-orm";
 import { characterSchema, conversationSchema } from "../../core/schemas";
-import { desc, eq } from "drizzle-orm";
 
 import { db } from "../../core/db";
 
@@ -29,7 +29,7 @@ export namespace User {
   export async function fetchConversations() {
     try {
       const conversations = await db.select().from(conversationSchema)
-        .orderBy(desc(conversationSchema.timestamp))
+        .orderBy(asc(conversationSchema.timestamp))
       return Promise.resolve(conversations);
     } catch (error) {
       console.log(`[fetchChatHistory]`, error);

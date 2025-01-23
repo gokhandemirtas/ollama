@@ -1,5 +1,3 @@
-import "./Prompt.css";
-
 import { Field, Label, Textarea } from "@headlessui/react";
 import { useEffect, useState } from "react";
 
@@ -45,8 +43,18 @@ export default function Prompt() {
 			});
 	}
 
+  function scrollToBottom() {
+    setTimeout(() => {
+      const scrollTarget = document.getElementById("scroll-target");
+      if (scrollTarget) {
+        scrollTarget.scrollIntoView({ behavior: "smooth" });
+      }
+    }, 300)
+  }
+
 	useEffect(() => {
 		getConversations();
+    scrollToBottom();
 	}, [setConversations]);
 
 	const submitQuery = (e: React.FormEvent) => {
@@ -66,13 +74,15 @@ export default function Prompt() {
 			.finally(() => {
 				setInProgress(false);
 				setQuery("");
+        scrollToBottom();
 			});
 	};
 	return (
 		<>
 			<ErrorBoundary fallback={<ErrorBoundaryFallback errorText="" />}>
-				<Panel className="mb-4">
-					<form className={inProgress ? "opacity-90 pointer-events-none" : ""}>
+				{conversations && conversations.map((conversation, index) => <Conversation conversation={conversation} callback={getConversations} key={index} />)}
+        <Panel className="mb-4">
+					<form className={inProgress ? "opacity-90 pointer-events-none" : ""} id="scroll-target">
 						<Field>
 							<Label className="text-xs/6 text-black">
 								{!inProgress && "Ask a question"}
@@ -82,7 +92,7 @@ export default function Prompt() {
 						</Field>
 
 						<div>
-							<button type="submit" className="primary-button mt-4 float-right" disabled={!query || inProgress || query.length < 10} onClick={(e) => submitQuery(e)}>
+							<button type="submit" className="primary-button mt-4 float-right" disabled={query.length === 0 || inProgress} onClick={(e) => submitQuery(e)}>
 								Query
 							</button>
 							{conversations.length > 0 && (
@@ -93,7 +103,6 @@ export default function Prompt() {
 						</div>
 					</form>
 				</Panel>
-				{conversations && conversations.map((conversation, index) => <Conversation conversation={conversation} callback={getConversations} key={index} />)}
 			</ErrorBoundary>
 		</>
 	);

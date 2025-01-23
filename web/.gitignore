@@ -26,3 +26,4 @@ dist-ssr
 .angular
 
 .env
+package-lock.json

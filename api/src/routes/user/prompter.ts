@@ -1,4 +1,3 @@
-import { bgBlue, bgMagenta, bgRed } from "ansis";
 import { conversationSchema, knowledgeSchema } from "../../core/schemas";
 import { cosineDistance, desc, eq, l2Distance } from "drizzle-orm";
 import { getSystemPrompt, getUserPrompt } from "../../core/prompts";
@@ -6,59 +5,90 @@ import { getSystemPrompt, getUserPrompt } from "../../core/prompts";
 import { CustomTools } from "../../core/tools";
 import { db } from "../../core/db";
 import getEmbedding from "../../core/embedding";
-import ollama from "ollama";
+import getOllama from "../../core/ollama-provider";
+import { log } from "../../core/logger";
+import timeSpan from 'time-span';
 import { updateChatHistory } from "../admin/management/crud";
 
-export async function prompter(userQuery: string, llmModel: string) {
+async function getKnowledge(embedding: Array<number>) {
 	try {
-		const response = await getEmbedding(userQuery);
-		const embedding = response.embedding;
-
-		if (!embedding || !Array.isArray(embedding)) {
-			return Promise.reject("Embedding invalid");
-		}
-
-		if (embedding && embedding.length !== 768) {
-			return Promise.reject("Embedding dimensions does not match the schema");
-		}
-
 		const knowledge = await db.select().from(knowledgeSchema).orderBy(cosineDistance(knowledgeSchema.embedding, embedding)).limit(1);
-
 		const flattenedKnowledge = knowledge ? knowledge.map((item) => item.content).join("\n") : "No previous knowledge available.";
+		return flattenedKnowledge;
+	} catch (error) {
+		log.error(`[getKnowledge] Knowledge retrieval failed: ${error}`);
+		return Promise.reject(error);
+	}
+}
 
+async function getChatHistory() {
+	try {
 		const chatHistory: any = await db.select().from(conversationSchema).where(eq(conversationSchema.role, "user")).orderBy(desc(conversationSchema.timestamp)).limit(100);
-
 		const flattenedChatHistory = chatHistory ? chatHistory.map((item: any) => `[${item?.role}] ${item?.content}`).join("\n") : "No previous conversation available.";
+		return flattenedChatHistory
+	} catch (error) {
+		log.error(`[getChatHistory] Chat history retrieval failed: ${error}`);
+		return Promise.reject(error);
+	}
+}
 
+async function embedder(userQuery: string) {
+	const response = await getEmbedding(userQuery);
+	const embedding = response.embedding;
+
+	if (!embedding || !Array.isArray(embedding)) {
+		log.error(`[embedder] Embedding invalid`);
+		return Promise.reject("Embedding invalid");
+	}
+
+	if (embedding && embedding.length !== 768) {
+		log.error(`[embedder] Embedding dimensions does not match the schema`);
+		return Promise.reject("Embedding dimensions does not match the schema");
+	}
+  log.info(`[embedder] Embedding: ${embedding.length} dimensions`);
+	return embedding;
+}
+
+export async function prompter(userQuery: string, llmModel: string) {
+  const ollama = getOllama()
+	try {
+    const timer = timeSpan();
+		const embedding = await embedder(userQuery);
+		const flattenedKnowledge = await getKnowledge(embedding);
+		const flattenedChatHistory = await getChatHistory();
 		const userPrompt = getUserPrompt(userQuery, flattenedKnowledge, flattenedChatHistory);
 
 		const messages = [
 			{ role: "system", content: getSystemPrompt() },
 			{ role: "user", content: userPrompt },
-			{ role: "user", content: `Previous conversation:\n${chatHistory}` },
+			{ role: "user", content: `Previous conversation:\n${flattenedChatHistory}` },
 		];
+
+    // log.info(`[Prompter] messages: `, JSON.stringify(messages));
 
 		const primaryResponse = await ollama.chat({
 			model: llmModel,
 			messages,
-			tools: [CustomTools.SaveCharacter, CustomTools.RetrieveCharacters],
+			tools: [CustomTools.SaveCharacter/* , CustomTools.RetrieveCharacters */],
 		});
+
+    // log.info(`[Prompter] primary response: `, JSON.stringify(primaryResponse));
 
 		const toolCalls = primaryResponse.message.tool_calls;
 
-		console.log(`[Tool] tool calls: `, toolCalls);
+		log.info(`[Tool] tool calls: `, JSON.stringify(toolCalls));
 
 		if (toolCalls && toolCalls.length > 0) {
 			for (const tool of toolCalls) {
 				try {
 					const content = await CustomTools.picker(tool.function.name)(tool.function.arguments);
-					console.log(bgMagenta(`Tool: ${tool.function.name}, Tool output: ${content}`));
+					log.info(`[Tool: ${tool.function.name}], Tool arguments: ${JSON.stringify(tool.function.arguments)}, Tool output: ${content}`);
 					messages.push({
 						role: "tool",
 						content,
 					});
 				} catch (error) {
-					console.log(bgRed(`Tool: ${tool.function.name}, Tool error: ${error}`));
+					log.error(`[Tool: ${tool.function.name}], Tool error: ${error}`);
 				}
 			}
 		}
@@ -67,6 +97,8 @@ export async function prompter(userQuery: string, llmModel: string) {
 			model: llmModel,
 			messages,
 		});
+
+    log.info(`[Prompter] Time taken: ${Number(timer.seconds()).toFixed(2)} secs`);
 
 		await updateChatHistory("assistant", finalResponse.message.content);
 		await updateChatHistory("user", userQuery ?? "No previous questions.");

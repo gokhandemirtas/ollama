@@ -1,9 +1,9 @@
+import { checkUploadDirectory, loadDirectory } from "./doc-loader";
 import { countDistinct, eq } from "drizzle-orm";
 
 import { Application } from "express";
 import { db } from "../../../core/db";
 import { knowledgeSchema } from "../../../core/schemas";
-import { loadDirectory } from "./doc-loader";
 import { updateKnowledge } from "../management/crud";
 
 export default function uploadRoutes(app: Application) {
@@ -55,7 +55,7 @@ export default function uploadRoutes(app: Application) {
 		try {
 			if (request.files) {
 				const file = (request.files as any).file;
-
+        checkUploadDirectory();
 				const isExisting = await db.select().from(knowledgeSchema).where(eq(knowledgeSchema.source, file.name));
 
 				if (isExisting.length > 0) {

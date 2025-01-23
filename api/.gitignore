@@ -91,3 +91,4 @@ target/
 
 # Rapid test data
 testdata
+package-lock.json
