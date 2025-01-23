@@ -10,76 +10,69 @@ import ollama from "ollama";
 import { updateChatHistory } from "../admin/management/crud";
 
 export async function prompter(userQuery: string, llmModel: string) {
-  try {
-    const response = await getEmbedding(userQuery);
-    const embedding = response.embedding;
+	try {
+		const response = await getEmbedding(userQuery);
+		const embedding = response.embedding;
 
-    if (!embedding || !Array.isArray(embedding)) {
-      return Promise.reject('Embedding invalid');
-    }
+		if (!embedding || !Array.isArray(embedding)) {
+			return Promise.reject("Embedding invalid");
+		}
 
-    if (embedding && embedding.length !== 768 ) {
-      return Promise.reject('Embedding dimensions does not match the schema');
-    }
+		if (embedding && embedding.length !== 768) {
+			return Promise.reject("Embedding dimensions does not match the schema");
+		}
 
-    const knowledge = await db.select().from(knowledgeSchema)
-      .orderBy(cosineDistance(knowledgeSchema.embedding, embedding))
-      .limit(1);
+		const knowledge = await db.select().from(knowledgeSchema).orderBy(cosineDistance(knowledgeSchema.embedding, embedding)).limit(1);
 
-    const flattenedKnowledge = knowledge ? knowledge.map((item) => item.content).join("\n") : 'No previous knowledge available.';
+		const flattenedKnowledge = knowledge ? knowledge.map((item) => item.content).join("\n") : "No previous knowledge available.";
 
-    const chatHistory: any = await db.select().from(conversationSchema)
-      .where(eq(conversationSchema.role, "user"))
-      .orderBy(desc(conversationSchema.timestamp))
-      .limit(100);
+		const chatHistory: any = await db.select().from(conversationSchema).where(eq(conversationSchema.role, "user")).orderBy(desc(conversationSchema.timestamp)).limit(100);
 
-    const flattenedChatHistory = chatHistory ? chatHistory.map((item: any) => `[${item?.role}] ${item?.content}`).join("\n")
-      : "No previous conversation available.";
+		const flattenedChatHistory = chatHistory ? chatHistory.map((item: any) => `[${item?.role}] ${item?.content}`).join("\n") : "No previous conversation available.";
 
-    const userPrompt = getUserPrompt(
-      userQuery,
-      flattenedKnowledge,
-      flattenedChatHistory
-    );
+		const userPrompt = getUserPrompt(userQuery, flattenedKnowledge, flattenedChatHistory);
 
-    const messages = [
-      { role: "system", content: getSystemPrompt() },
-      { role: "user", content: userPrompt },
-      { role: "user", content: `Previous conversation:\n${chatHistory}` },
-    ];
+		const messages = [
+			{ role: "system", content: getSystemPrompt() },
+			{ role: "user", content: userPrompt },
+			{ role: "user", content: `Previous conversation:\n${chatHistory}` },
+		];
 
-    const primaryResponse = await ollama.chat({
-      model: llmModel,
-      messages,
-      tools: [CustomTools.SaveCharacter, CustomTools.RetrieveCharacters]
-    });
+		const primaryResponse = await ollama.chat({
+			model: llmModel,
+			messages,
+			tools: [CustomTools.SaveCharacter, CustomTools.RetrieveCharacters],
+		});
 
-    const toolCalls = primaryResponse.message.tool_calls;
+		const toolCalls = primaryResponse.message.tool_calls;
 
-    if (toolCalls && toolCalls.length > 0) {
-      for (const tool of toolCalls) {
-        try {
-          const content = await CustomTools.picker(tool.function.name)(tool.function.arguments);
-          console.log(bgMagenta(`Tool: ${tool.function.name}, Tool output: ${content}`) );
-          messages.push({
-            role: 'tool',
-            content
-          });
-        } catch (error) {
-          console.log(bgRed(`Tool: ${tool.function.name}, Tool error: ${error}`));        }
-      }
-    }
+		console.log(`[Tool] tool calls: `, toolCalls);
 
-    const finalResponse = await ollama.chat({
-      model: llmModel,
-      messages
-    });
+		if (toolCalls && toolCalls.length > 0) {
+			for (const tool of toolCalls) {
+				try {
+					const content = await CustomTools.picker(tool.function.name)(tool.function.arguments);
+					console.log(bgMagenta(`Tool: ${tool.function.name}, Tool output: ${content}`));
+					messages.push({
+						role: "tool",
+						content,
+					});
+				} catch (error) {
+					console.log(bgRed(`Tool: ${tool.function.name}, Tool error: ${error}`));
+				}
+			}
+		}
 
-    await updateChatHistory("assistant", finalResponse.message.content);
-    await updateChatHistory("user", userQuery ?? "No previous questions.");
+		const finalResponse = await ollama.chat({
+			model: llmModel,
+			messages,
+		});
 
-    return Promise.resolve(finalResponse);
-  } catch (error) {
-    return Promise.reject(error);
-  }
+		await updateChatHistory("assistant", finalResponse.message.content);
+		await updateChatHistory("user", userQuery ?? "No previous questions.");
+
+		return Promise.resolve(finalResponse);
+	} catch (error) {
+		return Promise.reject(error);
+	}
 }
