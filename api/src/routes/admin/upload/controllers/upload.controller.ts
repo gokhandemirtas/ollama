@@ -6,7 +6,7 @@ import { DirectoryLoader } from "langchain/document_loaders/fs/directory";
 import { PDFLoader } from "@langchain/community/document_loaders/fs/pdf";
 import { TextLoader } from "langchain/document_loaders/fs/text";
 import fs from "node:fs"
-import { log } from "../../../core/logger";
+import { log } from "../../../../core/logger";
 
 export async function loadDirectory(path = process.env.DOC_BUCKET!) {
 	try {

@@ -1,13 +1,14 @@
 import { Application } from "express";
+import { CharacterController } from "./controllers/character.controller";
+import { ChatController } from "./controllers/chat.controller";
 import IConversation from "../../core/models/conversation";
-import { User } from "./user-utils";
-import { prompter } from "./prompter";
+import { promptController } from "./controllers/prompt.controller";
 
 export default function userRoutes(app: Application) {
   app.post("/query", async (request, reply, next) => {
     try {
       const userQuery = request.body.query as string;
-      const response = await prompter(userQuery, process.env.LLM_MODEL!);
+      const response = await promptController(userQuery, process.env.LLM_MODEL!);
       reply.type("application/json").status(200).send(response);
     } catch (error) {
       next(error);
@@ -16,7 +17,7 @@ export default function userRoutes(app: Application) {
 
   app.delete("/conversations", async (request, reply, next) => {
     try {
-      await User.clearChatHistory();
+      await ChatController.clearChatHistory();
       reply.type("application/json").status(200).send(true);
     } catch (error) {
       next(error);
@@ -26,7 +27,7 @@ export default function userRoutes(app: Application) {
   app.delete("/conversation/:id", async (request, reply, next) => {
     try {
       const conversationId = Number(request.params.id);
-      await User.deleteConversation(conversationId);
+      await ChatController.deleteConversation(conversationId);
       reply.type("application/json").status(200).send(true);
     } catch (error) {
       next(error);
@@ -35,7 +36,7 @@ export default function userRoutes(app: Application) {
 
   app.get("/conversations", async (request, reply, next) => {
     try {
-      const conversations: any = await User.fetchConversations();
+      const conversations: any = await ChatController.fetchConversations();
       const sorted = conversations.sort((a: IConversation, b: IConversation) => {
         const first = String(a.timestamp).split('.')[0];
         const second = String(b.timestamp).split('.')[0];
@@ -52,7 +53,7 @@ export default function userRoutes(app: Application) {
 
   app.get("/characters", async (request, reply, next) => {
     try {
-      const characters: any = await User.fetchCharacters();
+      const characters: any = await CharacterController.fetchCharacters();
       reply.type("application/json").status(200).send(characters);
     } catch (error) {
       next(error);
@@ -62,7 +63,7 @@ export default function userRoutes(app: Application) {
   app.delete("/character/:id", async (request, reply, next) => {
     try {
       const characterId = Number(request.params.id);
-      await User.deleteCharacter(characterId);
+      await CharacterController.deleteCharacter(characterId);
       reply.type("application/json").status(200).send();
     } catch (error) {
       next(error);

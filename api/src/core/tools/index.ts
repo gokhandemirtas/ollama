@@ -1,9 +1,9 @@
-import { retrieveCharacters } from "./retrieve-character";
-import { saveCharacter } from "./save-character";
+import { retrieveCharacters } from "./retrieve-character.tool";
+import { saveCharacter } from "./save-character.tool";
 
-export * from "./retrieve-character";
-export * from "./create-character";
-export * from "./save-character";
+export * from "./retrieve-character.tool";
+export * from "./create-character.tool";
+export * from "./save-character.tool";
 
 export default function toolPicker(name: string): Function {
   switch (name) {

@@ -1,14 +1,14 @@
-import { conversationSchema, knowledgeSchema } from "../../core/schemas";
+import { conversationSchema, knowledgeSchema } from "../../../core/schemas";
 import { cosineDistance, desc, eq, l2Distance } from "drizzle-orm";
-import { getSystemPrompt, getUserPrompt } from "../../core/prompts";
-import toolPicker, { RetrieveCharacters, SaveCharacter } from "../../core/tools";
+import { getSystemPrompt, getUserPrompt } from "../../../core/prompt-templates.";
+import toolPicker, { RetrieveCharacters, SaveCharacter } from "../../../core/tools";
 
-import { db } from "../../core/db";
-import getEmbedding from "../../core/embedding";
-import getOllama from "../../core/ollama-provider";
-import { log } from "../../core/logger";
+import { db } from "../../../core/db";
+import getEmbedding from "../../../core/embedding-provider";
+import getLLM from "../../../core/llm-provider";
+import { log } from "../../../core/logger";
 import timeSpan from 'time-span';
-import { updateChatHistory } from "../admin/management/crud";
+import { updateChatHistory } from "../../admin/management/controllers/management.controller";
 
 async function getKnowledge(embedding: Array<number>) {
 	try {
@@ -49,8 +49,8 @@ async function embedder(userQuery: string) {
 	return embedding;
 }
 
-export async function prompter(userQuery: string, llmModel: string) {
-  const ollama = getOllama()
+export async function promptController(userQuery: string, llmModel: string) {
+  const ollama = getLLM();
 	try {
     const timer = timeSpan();
 		const embedding = await embedder(userQuery);
@@ -64,7 +64,7 @@ export async function prompter(userQuery: string, llmModel: string) {
 			{ role: "user", content: `Previous conversation:\n${flattenedChatHistory}` },
 		];
 
-    // log.info(`[Prompter] messages: `, JSON.stringify(messages));
+    // log.info(`[promptController] messages: `, JSON.stringify(messages));
 
 		const primaryResponse = await ollama.chat({
 			model: llmModel,
@@ -72,7 +72,7 @@ export async function prompter(userQuery: string, llmModel: string) {
 			tools: [SaveCharacter, RetrieveCharacters/* , CreateCharacter */],
 		});
 
-    // log.info(`[Prompter] primary response: `, JSON.stringify(primaryResponse));
+    // log.info(`[promptController] primary response: `, JSON.stringify(primaryResponse));
 
 		const toolCalls = primaryResponse.message.tool_calls;
 
@@ -98,7 +98,7 @@ export async function prompter(userQuery: string, llmModel: string) {
 			messages,
 		});
 
-    log.info(`[Prompter] Time taken: ${Number(timer.seconds()).toFixed(2)} secs`);
+    log.info(`[promptController] Time taken: ${Number(timer.seconds()).toFixed(2)} secs`);
 
 		await updateChatHistory("assistant", finalResponse.message.content);
 		await updateChatHistory("user", userQuery ?? "No previous questions.");

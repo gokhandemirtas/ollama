@@ -13,7 +13,8 @@ export function getSystemPrompt(topic = 'role playing game Dungeons and Dragons'
     You are only responsible for the following tasks:
 
     1. Answering questions related to ${topic}.
-    2. When user wants to create a new character, ${createCharacter()}
+    2. When user wants to create a new character, ${createCharacter()}. Ask one question at a time, and don't move to next question before getting answer to current one.
+        Do not call saveCharacter tool during this process.
     3. Call saveCharacter tool when user asks to save a character.
     4. Call retrieveCharacters tool when user asks to retrieve a character.
   `

@@ -1,10 +1,10 @@
-import { checkUploadDirectory, loadDirectory } from "./doc-loader";
+import { checkUploadDirectory, loadDirectory } from "./controllers/upload.controller";
 import { countDistinct, eq } from "drizzle-orm";
 
 import { Application } from "express";
 import { db } from "../../../core/db";
 import { knowledgeSchema } from "../../../core/schemas";
-import { updateKnowledge } from "../management/crud";
+import { updateKnowledge } from "../management/controllers/management.controller";
 
 export default function uploadRoutes(app: Application) {
 	app.delete("/upload", async (request, reply, next) => {

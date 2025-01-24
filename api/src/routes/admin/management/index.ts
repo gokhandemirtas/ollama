@@ -1,6 +1,5 @@
-import { getTable } from "./crud";
-
 import { Application } from "express";
+import { getTable } from "./controllers/management.controller";
 
 export default function managementRoutes(app: Application): void {
 	app.get("/collection/:name", async (request, reply, next) => {

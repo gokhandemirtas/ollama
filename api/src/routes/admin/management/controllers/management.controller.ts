@@ -1,10 +1,10 @@
-import { Metadata } from "../../../core/models/metadata";
-import { conversationSchema } from "../../../core/schemas";
-import { db } from "../../../core/db";
-import getEmbedding from "../../../core/embedding";
-import { knowledgeSchema } from "../../../core/schemas/knowledge-schema";
+import { Metadata } from "../../../../core/models/metadata";
+import { conversationSchema } from "../../../../core/schemas";
+import { db } from "../../../../core/db";
+import getEmbedding from "../../../../core/embedding-provider";
+import { knowledgeSchema } from "../../../../core/schemas/knowledge-schema";
+import { log } from "../../../../core/logger";
 import { sql } from "drizzle-orm";
-import { log } from "../../../core/logger";
 
 export async function getTable(name: string) {
 	try {

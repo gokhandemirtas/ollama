@@ -3,7 +3,7 @@ import axios from "axios";
 import { log } from "./logger";
 
 export default async function getEmbedding(prompt: string): Promise<EmbeddingsResponse> {
-	const url = `${process.env.LLAMA_URL!}/api/embeddings`;
+	const url = `${process.env.LLM_URL!}/api/embeddings`;
 	const model = process.env.EMBEDDER_MODEL!;
 	log.info(`[getEmbedding] using ${url}`);
 	try {

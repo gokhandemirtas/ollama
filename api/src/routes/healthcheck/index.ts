@@ -7,7 +7,7 @@ export default function healthCheckRoutes(app: Application) {
   app.get("/healthcheck", async (request, reply, next) => {
     let isDbOnline, isLLmOnline;
     try {
-      const llmUrl = process.env.LLAMA_URL!;
+      const llmUrl = process.env.LLM_URL!;
       const llama = await ky.get(llmUrl, { timeout: 1000});
       isLLmOnline = llama.status === 200;
     } catch (error) {
