@@ -1,5 +1,5 @@
 import { Application } from "express";
-import { db } from "../../core/db";
+import { db } from "../../core/providers/db.provider";
 import ky from 'ky';
 import { userSchema } from "../../core/schemas";
 

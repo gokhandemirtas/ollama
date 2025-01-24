@@ -3,10 +3,10 @@ import { cosineDistance, desc, eq, l2Distance } from "drizzle-orm";
 import { getSystemPrompt, getUserPrompt } from "../../../core/prompt-templates.";
 import toolPicker, { RetrieveCharacters, SaveCharacter } from "../../../core/tools";
 
-import { db } from "../../../core/db";
-import getEmbedding from "../../../core/embedding-provider";
-import getLLM from "../../../core/llm-provider";
-import { log } from "../../../core/logger";
+import { db } from "../../../core/providers/db.provider";
+import getEmbedding from "../../../core/providers/embedding.provider";
+import getLLM from "../../../core/providers/llm.provider";
+import { log } from "../../../core/providers/logger.provider";
 import timeSpan from 'time-span';
 import { updateChatHistory } from "../../admin/management/controllers/management.controller";
 
@@ -50,7 +50,15 @@ async function embedder(userQuery: string) {
 }
 
 export async function promptController(userQuery: string, llmModel: string) {
-  const ollama = getLLM();
+  const llm = getLLM();
+
+  try {
+    await llm.show({ model: llmModel });
+  } catch (error) {
+    log.error(`[promptController] Error while getting ${llmModel}: ${error}`);
+    return Promise.reject(`${llmModel} is not found`);
+  }
+
 	try {
     const timer = timeSpan();
 		const embedding = await embedder(userQuery);
@@ -64,15 +72,13 @@ export async function promptController(userQuery: string, llmModel: string) {
 			{ role: "user", content: `Previous conversation:\n${flattenedChatHistory}` },
 		];
 
-    // log.info(`[promptController] messages: `, JSON.stringify(messages));
-
-		const primaryResponse = await ollama.chat({
+		const primaryResponse = await llm.chat({
 			model: llmModel,
 			messages,
 			tools: [SaveCharacter, RetrieveCharacters/* , CreateCharacter */],
 		});
 
-    // log.info(`[promptController] primary response: `, JSON.stringify(primaryResponse));
+    log.info(`[promptController] primaryResponse took: ${Number(timer.seconds()).toFixed(2)} secs `);
 
 		const toolCalls = primaryResponse.message.tool_calls;
 
@@ -93,12 +99,12 @@ export async function promptController(userQuery: string, llmModel: string) {
 			}
 		}
 
-		const finalResponse = await ollama.chat({
+		const finalResponse = await llm.chat({
 			model: llmModel,
 			messages,
 		});
 
-    log.info(`[promptController] Time taken: ${Number(timer.seconds()).toFixed(2)} secs`);
+    log.info(`[promptController] finalResponse took: ${Number(timer.seconds()).toFixed(2)} secs`);
 
 		await updateChatHistory("assistant", finalResponse.message.content);
 		await updateChatHistory("user", userQuery ?? "No previous questions.");

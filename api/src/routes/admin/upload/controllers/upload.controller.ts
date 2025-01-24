@@ -1,12 +1,25 @@
 import { JSONLinesLoader, JSONLoader } from "langchain/document_loaders/fs/json";
+import { NextFunction, Request, Response } from 'express';
 import { readdirSync, rmSync } from "node:fs";
 
 import { CSVLoader } from "@langchain/community/document_loaders/fs/csv";
 import { DirectoryLoader } from "langchain/document_loaders/fs/directory";
 import { PDFLoader } from "@langchain/community/document_loaders/fs/pdf";
 import { TextLoader } from "langchain/document_loaders/fs/text";
+import { db } from "../../../../core/providers/db.provider";
+import { eq } from "drizzle-orm";
 import fs from "node:fs"
-import { log } from "../../../../core/logger";
+import { knowledgeSchema } from "../../../../core/schemas";
+import { log } from "../../../../core/providers/logger.provider";
+import pThrottle from "p-throttle";
+import { updateKnowledge } from "../../management/controllers/management.controller";
+
+const throttle = pThrottle({
+  limit: 2,
+  interval: 300,
+})
+
+const abortController = new AbortController();
 
 export async function loadDirectory(path = process.env.DOC_BUCKET!) {
 	try {
@@ -31,6 +44,39 @@ export async function loadDirectory(path = process.env.DOC_BUCKET!) {
 		log.error(`[loadDirectory]`, error);
 		return Promise.reject(error);
 	}
+}
+
+export async function handleFileUploadRequest(req: Request, res: Response, next: NextFunction) {
+  const file = (req.files as any).file;
+  const metadatas = req.body.metadata
+                    .split(",").map((name: string) => ({ name: name.replace(" ", "") })) ?? [];
+  const source = req.body.name;
+  const category = req.body.category;
+
+  const isExisting = await db.select().
+                      from(knowledgeSchema)
+                      .where(eq(knowledgeSchema.source, file.name));
+
+  if (isExisting.length > 0) {
+    res.type("application/json").status(400).send(`File ${file.name} already exists`);
+  } else {
+    checkUploadDirectory();
+    file.mv(`./${process.env.DOC_BUCKET!}/${req.body.name}`);
+
+    const contents = await loadDirectory(process.env.DOC_BUCKET!);
+
+    const result = await Promise.all([
+        ...await contents.map(async(content) => {
+          const throttled = throttle(async() => {
+            return await updateKnowledge({content, metadatas, source, category});
+          });
+          return await throttled();
+        })
+      ]
+    )
+
+    res.type("application/json").status(200).send(true);
+  }
 }
 
 export async function checkUploadDirectory() {

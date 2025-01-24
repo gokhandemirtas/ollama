@@ -2,12 +2,21 @@ import "dotenv/config";
 
 import cors from "cors";
 import express from "express";
+import { expressErrorMiddleware } from "./core/error-response.provider";
 import fileUpload from "express-fileupload";
 import { json } from "body-parser";
 import rateLimit from "express-rate-limit";
 import setRoutes from "./routes/index";
 
-const pino = require("pino-http")();
+const pino = require("pino");
+const pinoHttp = require("pino-http")({
+  logger: pino({
+    level: "error",
+    transport: {
+      target: "pino-pretty"
+    }
+  })
+});
 
 const limiter = rateLimit({
 	windowMs: 15 * 60 * 1000, // 15 minutes
@@ -16,12 +25,13 @@ const limiter = rateLimit({
 });
 
 const app = express();
+app.use(pinoHttp);
 app.use(json());
 app.use(cors({ origin: process.env.WEB_APP_URL! }));
 app.use(fileUpload());
-setRoutes(app);
-app.use(pino);
 app.use(limiter);
+app.use(expressErrorMiddleware);
+setRoutes(app);
 
 app.listen(process.env.API_PORT || 3000, async () => {
 	console.table({

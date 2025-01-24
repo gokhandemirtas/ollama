@@ -1,8 +1,8 @@
 import { ICharacter } from "../models/character";
 import { Tool } from "ollama";
 import { characterSchema } from "../schemas";
-import { db } from "../db";
-import { log } from "../logger";
+import { db } from "../providers/db.provider";
+import { log } from "../providers/logger.provider";
 import { parameters } from "./character-params";
 
 export async function saveCharacter(char: ICharacter) {

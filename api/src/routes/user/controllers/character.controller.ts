@@ -1,7 +1,7 @@
 import { characterSchema } from "../../../core/schemas";
-import { db } from "../../../core/db";
+import { db } from "../../../core/providers/db.provider";
 import { eq } from "drizzle-orm";
-import { log } from "../../../core/logger";
+import { log } from "../../../core/providers/logger.provider";
 
 export namespace CharacterController {
   export async function fetchCharacters() {

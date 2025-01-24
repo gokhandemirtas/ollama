@@ -1,7 +1,7 @@
 import { asc, eq } from "drizzle-orm";
 
 import { conversationSchema } from "../../../core/schemas";
-import { db } from "../../../core/db";
+import { db } from "../../../core/providers/db.provider";
 
 export namespace ChatController {
   export async function clearChatHistory() {

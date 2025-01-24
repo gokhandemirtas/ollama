@@ -1,7 +1,7 @@
 import { Tool } from "ollama";
 import { characterSchema } from "../schemas";
-import { db } from "../db";
-import { log } from "../logger";
+import { db } from "../providers/db.provider";
+import { log } from "../providers/logger.provider";
 
 export async function retrieveCharacters() {
   try {

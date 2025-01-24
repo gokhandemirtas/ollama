@@ -1,5 +1,5 @@
 import { Tool } from "ollama";
-import { log } from "../logger";
+import { log } from "../providers/logger.provider";
 import { parameters } from "./character-params";
 
 export function createCharacter() {
@@ -8,7 +8,7 @@ export function createCharacter() {
     Object.values(parameters.required).forEach((key, index) => {
       const field = key;
       const desc = (parameters as any).properties[key]?.description || "";
-      prompt.push(`Ask the user to provide ${field}, ${desc}`);
+      prompt.push(`Ask for: ${field}, ${desc}`);
     });
     const str = prompt.join("\n");
     log.info(`[createCharacter] ${str}`);
