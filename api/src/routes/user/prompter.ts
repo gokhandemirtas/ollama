@@ -1,8 +1,8 @@
 import { conversationSchema, knowledgeSchema } from "../../core/schemas";
 import { cosineDistance, desc, eq, l2Distance } from "drizzle-orm";
 import { getSystemPrompt, getUserPrompt } from "../../core/prompts";
+import toolPicker, { RetrieveCharacters, SaveCharacter } from "../../core/tools";
 
-import { CustomTools } from "../../core/tools";
 import { db } from "../../core/db";
 import getEmbedding from "../../core/embedding";
 import getOllama from "../../core/ollama-provider";
@@ -45,7 +45,7 @@ async function embedder(userQuery: string) {
 		log.error(`[embedder] Embedding dimensions does not match the schema`);
 		return Promise.reject("Embedding dimensions does not match the schema");
 	}
-  log.info(`[embedder] Embedding: ${embedding.length} dimensions`);
+  // log.info(`[embedder] Embedding: ${embedding.length} dimensions`);
 	return embedding;
 }
 
@@ -69,19 +69,19 @@ export async function prompter(userQuery: string, llmModel: string) {
 		const primaryResponse = await ollama.chat({
 			model: llmModel,
 			messages,
-			tools: [CustomTools.SaveCharacter/* , CustomTools.RetrieveCharacters */],
+			tools: [SaveCharacter, RetrieveCharacters/* , CreateCharacter */],
 		});
 
     // log.info(`[Prompter] primary response: `, JSON.stringify(primaryResponse));
 
 		const toolCalls = primaryResponse.message.tool_calls;
 
-		log.info(`[Tool] tool calls: `, JSON.stringify(toolCalls));
+		toolCalls && log.info(`[Tool] tool calls: `, toolCalls!.length);
 
 		if (toolCalls && toolCalls.length > 0) {
 			for (const tool of toolCalls) {
 				try {
-					const content = await CustomTools.picker(tool.function.name)(tool.function.arguments);
+					const content = await toolPicker(tool.function.name)(tool.function.arguments);
 					log.info(`[Tool: ${tool.function.name}], Tool arguments: ${JSON.stringify(tool.function.arguments)}, Tool output: ${content}`);
 					messages.push({
 						role: "tool",

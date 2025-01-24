@@ -37,7 +37,7 @@ export default function Character({ character, onDeletedHandler, onSelectedHandl
       <img src={portrait} alt={`${character.race} ${character.class}`} className="w-full h-auto mx-auto" />
       {character && (
         <div className="p-2">
-          <h2 className="text-sm/6 font-bold text-emerald-800">{character.name}</h2>
+          <h2 className="text-sm/6 font-bold text-emerald-800">{character.name ?? 'No name'}</h2>
           <TrashIcon className="absolute right-2 top-48 tool-button size-4 text-black hover:text-teal-500 cursor-pointer" onClick={deleteChar}/>
           <p className="text-xs/6">
             Lvl {character.level.level}, {character.race} {character.class}
