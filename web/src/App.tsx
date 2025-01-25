@@ -5,7 +5,7 @@ import FileUploader from './admin/FileUploader';
 import HttpErrorHandler from './core/components/HttpErrorAlert';
 import { Layout } from './core/components/Layout';
 import ProgressBar from './core/components/ProgressBar';
-import Prompt from './user/Prompt';
+import Prompt from './conversation/Prompt';
 import { Uploads } from './admin/Uploads';
 import { useEffect } from 'react';
 import useHealthCheckStore from './core/store/health-check.store';

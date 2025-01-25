@@ -57,6 +57,12 @@ export default function Prompt() {
     setConversations(conversations.filter((conversation) => conversation.id !== conversationId));
   }
 
+  function onMarkdownEvent(content: string) {
+    const query = `Tell me more about ${content}`;
+    setQuery(query);
+    // submitQuery(null as any);
+  }
+
   function onEnterHandler(e: React.KeyboardEvent) {
     console.log(`Key pressed: ${e.key}`);
     if (e.key === "Enter") {
@@ -70,7 +76,7 @@ export default function Prompt() {
 	}, [setConversations]);
 
 	const submitQuery = (e: React.FormEvent) => {
-		e.preventDefault();
+		e && e.preventDefault();
 		setInProgress(true);
 
 		api
@@ -91,8 +97,14 @@ export default function Prompt() {
 	return (
 		<>
 			<ErrorBoundary fallback={<ErrorBoundaryFallback errorText="" />}>
-				{conversations && conversations.map((conversation, index) => <Conversation conversation={conversation} onDeleteHandler={onDeleteHandler} key={index} />)}
-        <Panel className="mb-4">
+				{ conversations &&
+          conversations.map((conversation, index) =>
+            <Conversation conversation={conversation}
+              onMarkdownEvent={onMarkdownEvent}
+              onDeleteHandler={onDeleteHandler} key={index} />
+          )
+        }
+        <Panel>
 					<form className={inProgress ? "opacity-90 pointer-events-none" : ""} id="scroll-target">
 						<Field>
 							<Label className="text-xs/6 text-black">

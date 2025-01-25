@@ -9,10 +9,20 @@ import { UserCircleIcon } from "@heroicons/react/24/solid";
 import api from "../core/services/HttpClient";
 import { formatTime } from "../core/utils/timestamper";
 
-export default function Conversation({conversation, onDeleteHandler }: {
+export default function Conversation({conversation, onDeleteHandler, onMarkdownEvent }: {
   conversation: IConversation;
   onDeleteHandler: (conversationId: number) => void;
+  onMarkdownEvent: (content: string) => void;
 }) {
+
+  const components = {
+    ul(props) {
+      return <ul className="flex flex-wrap gap-1 mt-1 mb-1">{ props.children }</ul>
+    },
+    li(props) {
+      return <li><button className="markdown-button" onClick={(e) => onMarkdownEvent(props.children)}>{ props?.children }</button></li>
+    }
+  }
 
   function copyToClipboard() {
     navigator.clipboard.writeText(conversation.content);
@@ -49,10 +59,7 @@ export default function Conversation({conversation, onDeleteHandler }: {
         <div className="flex items-start gap-2.5 w-full">
 
           { conversation.role === 'user' && <UserCircleIcon className="size-8 text-teal-500" /> }
-          <div className={getClass()} style={{
-              marginLeft: conversation.role === 'assistant' ? '40px' : '0',
-              marginRight: conversation.role === 'user' ? '40px' : '0',
-            }}>
+          <div className={getClass()}>
             <div className="flex items-center space-x-2 rtl:space-x-reverse">
               <span className="text-sm font-semibold text-gray-900 dark:text-white">
                 {conversation.role === 'assistant' ? 'Dungeon Master' : 'You'}
@@ -62,7 +69,7 @@ export default function Conversation({conversation, onDeleteHandler }: {
               </span>
             </div>
             <aside className="overflow-hidden overflow-x-auto">
-              <Markdown className="text-xs font-normal py-2.5 text-gray-900 dark:text-white !text-wrap !break-words">
+              <Markdown className="text-xs font-normal py-2.5 text-gray-900 dark:text-white !text-wrap !break-words" components={components}>
                 { conversation.content }
               </Markdown>
             </aside>

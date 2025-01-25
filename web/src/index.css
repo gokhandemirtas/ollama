@@ -23,6 +23,11 @@ body, html {
          focus-visible:outline-offset-2 focus-visible:outline-teal-600;
 }
 
+.markdown-button {
+  @apply rounded-md bg-pink-200 px-1 py-1 text-xs font-semibold text-black
+    hover:bg-pink-300;
+}
+
 .cancel-button {
   @apply text-sm/6 font-semibold text-gray-900;
 }

@@ -1,7 +1,7 @@
 import { conversationSchema, knowledgeSchema } from "../../../core/schemas";
-import { cosineDistance, desc, eq, l2Distance } from "drizzle-orm";
-import { getSystemPrompt, getUserPrompt } from "../../../core/prompt-templates.";
-import toolPicker, { CreateCharacter, RetrieveCharacters, SaveCharacter } from "../../../core/tools";
+import { desc, eq, l2Distance } from "drizzle-orm";
+import { getSystemPrompt, getUserPrompt } from "../../../core/prompt-templates/prompt-templates.";
+import toolPicker, { RetrieveCharacters } from "../../../core/tools";
 
 import { db } from "../../../core/providers/db.provider";
 import getEmbedding from "../../../core/providers/embedding.provider";
@@ -75,7 +75,7 @@ export async function promptController(userQuery: string, llmModel: string) {
 		const initialResponse = await llm.chat({
 			model: llmModel,
 			messages,
-			tools: [SaveCharacter, RetrieveCharacters/* , CreateCharacter */],
+			tools: [RetrieveCharacters],
 		});
 
     log.info(`[promptController] initialResponse took: ${Number(timer.seconds()).toFixed(2)} secs `);
