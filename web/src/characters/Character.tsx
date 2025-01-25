@@ -10,7 +10,7 @@ const portraits = import.meta.glob('../assets/portraits/*.png', { eager: true })
 
 export default function Character({ character, onDeletedHandler, onSelectedHandler }: {
   character: ICharacter;
-  onDeletedHandler: () => void;
+  onDeletedHandler: (characterId: number) => void;
   onSelectedHandler: (character: ICharacter) => void;
 }) {
 
@@ -25,12 +25,12 @@ export default function Character({ character, onDeletedHandler, onSelectedHandl
 
   async function deleteChar() {
     await api.delete(`${import.meta.env.VITE_BACKEND_URL}/character/${character.id}`);
-    onDeletedHandler();
+    onDeletedHandler(character.id);
   }
 
   useEffect(() => {
     setPortrait(getPortrait());
-  }, [character]);
+  }, [setPortrait]);
 
   return (
     <div className="character-card relative" onClick={() => onSelectedHandler(character)}>
@@ -40,7 +40,7 @@ export default function Character({ character, onDeletedHandler, onSelectedHandl
           <h2 className="text-sm/6 font-bold text-emerald-800">{character.name ?? 'No name'}</h2>
           <TrashIcon className="absolute right-2 top-48 tool-button size-4 text-black hover:text-teal-500 cursor-pointer" onClick={deleteChar}/>
           <p className="text-xs/6">
-            Lvl {character.level.level}, {character.race} {character.class}
+            Lvl {character.level?.level}, {character.race} {character.class}
           </p>
         </div>
       )}

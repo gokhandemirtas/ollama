@@ -1,6 +1,4 @@
-import { json, pgTable, serial, text, timestamp, uuid } from "drizzle-orm/pg-core";
-
-import { update } from "lodash-es";
+import { boolean, json, pgTable, serial, text, timestamp, uuid } from "drizzle-orm/pg-core";
 
 export const characterSchema = pgTable("characters", {
   id: serial("id").primaryKey(),
@@ -15,4 +13,5 @@ export const characterSchema = pgTable("characters", {
   inventory: text("inventory").notNull(),
   backstory: text("backstory").notNull(),
   userId: uuid("userId").notNull(),
+  isDraft: boolean("isDraft").notNull().default(true),
 });

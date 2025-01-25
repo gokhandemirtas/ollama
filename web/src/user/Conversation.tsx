@@ -3,14 +3,15 @@ import { FireIcon } from "@heroicons/react/20/solid";
 import IConversation from "../core/models/conversation";
 import Markdown from "react-markdown";
 import { Panel } from "../core/components/Panel";
+import { SpeakerWaveIcon } from "@heroicons/react/24/solid";
 import { TrashIcon } from "@heroicons/react/24/solid";
 import { UserCircleIcon } from "@heroicons/react/24/solid";
 import api from "../core/services/HttpClient";
 import { formatTime } from "../core/utils/timestamper";
 
-export default function Conversation({conversation, callback }: {
+export default function Conversation({conversation, onDeleteHandler }: {
   conversation: IConversation;
-  callback: () => void;
+  onDeleteHandler: (conversationId: number) => void;
 }) {
 
   function copyToClipboard() {
@@ -22,8 +23,18 @@ export default function Conversation({conversation, callback }: {
       .json()
       .then(() => {
         conversation.isSoftDeleted = true;
-        callback();
+        onDeleteHandler(conversation.id);
       });
+  }
+
+  function speak(content: string) {
+    const synth = window.speechSynthesis;
+    if (!synth) return;
+    if (synth.speaking) {
+      synth.cancel();
+    }
+    const utterance = new SpeechSynthesisUtterance(content);
+    synth.speak(utterance);
   }
 
   function getClass() {
@@ -38,7 +49,10 @@ export default function Conversation({conversation, callback }: {
         <div className="flex items-start gap-2.5 w-full">
 
           { conversation.role === 'user' && <UserCircleIcon className="size-8 text-teal-500" /> }
-          <div className={getClass()}>
+          <div className={getClass()} style={{
+              marginLeft: conversation.role === 'assistant' ? '40px' : '0',
+              marginRight: conversation.role === 'user' ? '40px' : '0',
+            }}>
             <div className="flex items-center space-x-2 rtl:space-x-reverse">
               <span className="text-sm font-semibold text-gray-900 dark:text-white">
                 {conversation.role === 'assistant' ? 'Dungeon Master' : 'You'}
@@ -48,13 +62,14 @@ export default function Conversation({conversation, callback }: {
               </span>
             </div>
             <aside className="overflow-hidden overflow-x-auto">
-              <Markdown className="text-xs font-normal py-2.5 text-gray-900 dark:text-white !text-wrap !break-words" allowedElements={['p']}>
+              <Markdown className="text-xs font-normal py-2.5 text-gray-900 dark:text-white !text-wrap !break-words">
                 { conversation.content }
               </Markdown>
             </aside>
             <nav className="absolute right-2 top-2">
               <ClipboardDocumentIcon className="tool-button size-4 text-white hover:text-teal-500 cursor-pointer mb-2" onClick={copyToClipboard}/>
-              <TrashIcon className="tool-button size-4 text-white hover:text-teal-500 cursor-pointer" onClick={deleteChat}/>
+              <TrashIcon className="tool-button size-4 text-white hover:text-teal-500 cursor-pointer mb-2" onClick={deleteChat}/>
+              <SpeakerWaveIcon className="tool-button size-4 text-white hover:text-teal-500 cursor-pointer" onClick={() => speak(conversation.content)}/>
             </nav>
           </div>
           { conversation.role === 'assistant' && <FireIcon className="size-9 text-teal-500" /> }

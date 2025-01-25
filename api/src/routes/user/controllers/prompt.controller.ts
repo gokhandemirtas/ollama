@@ -1,7 +1,7 @@
 import { conversationSchema, knowledgeSchema } from "../../../core/schemas";
 import { cosineDistance, desc, eq, l2Distance } from "drizzle-orm";
 import { getSystemPrompt, getUserPrompt } from "../../../core/prompt-templates.";
-import toolPicker, { RetrieveCharacters, SaveCharacter } from "../../../core/tools";
+import toolPicker, { CreateCharacter, RetrieveCharacters, SaveCharacter } from "../../../core/tools";
 
 import { db } from "../../../core/providers/db.provider";
 import getEmbedding from "../../../core/providers/embedding.provider";
@@ -12,7 +12,7 @@ import { updateChatHistory } from "../../admin/management/controllers/management
 
 async function getKnowledge(embedding: Array<number>) {
 	try {
-		const knowledge = await db.select().from(knowledgeSchema).orderBy(cosineDistance(knowledgeSchema.embedding, embedding)).limit(1);
+		const knowledge = await db.select().from(knowledgeSchema).orderBy(l2Distance(knowledgeSchema.embedding, embedding)).limit(1);
 		const flattenedKnowledge = knowledge ? knowledge.map((item) => item.content).join("\n") : "No previous knowledge available.";
 		return flattenedKnowledge;
 	} catch (error) {
@@ -23,7 +23,7 @@ async function getKnowledge(embedding: Array<number>) {
 
 async function getChatHistory() {
 	try {
-		const chatHistory: any = await db.select().from(conversationSchema).where(eq(conversationSchema.role, "user")).orderBy(desc(conversationSchema.timestamp)).limit(100);
+		const chatHistory: any = await db.select().from(conversationSchema).where(eq(conversationSchema.role, "user")).orderBy(desc(conversationSchema.timestamp)).limit(500);
 		const flattenedChatHistory = chatHistory ? chatHistory.map((item: any) => `[${item?.role}] ${item?.content}`).join("\n") : "No previous conversation available.";
 		return flattenedChatHistory
 	} catch (error) {
@@ -72,15 +72,15 @@ export async function promptController(userQuery: string, llmModel: string) {
 			{ role: "user", content: `Previous conversation:\n${flattenedChatHistory}` },
 		];
 
-		const primaryResponse = await llm.chat({
+		const initialResponse = await llm.chat({
 			model: llmModel,
 			messages,
 			tools: [SaveCharacter, RetrieveCharacters/* , CreateCharacter */],
 		});
 
-    log.info(`[promptController] primaryResponse took: ${Number(timer.seconds()).toFixed(2)} secs `);
+    log.info(`[promptController] initialResponse took: ${Number(timer.seconds()).toFixed(2)} secs `);
 
-		const toolCalls = primaryResponse.message.tool_calls;
+		const toolCalls = initialResponse.message.tool_calls;
 
 		toolCalls && log.info(`[Tool] tool calls: `, toolCalls!.length);
 

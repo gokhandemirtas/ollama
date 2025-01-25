@@ -4,9 +4,9 @@
   "description": "A RESTful API built with Express and TypeScript",
   "main": "src/app.ts",
   "scripts": {
-    "start": "cls && tsx src/app.ts",
+    "start": "tsx src/app.ts",
     "build": "tsc",
-    "dev": "nodemon --exec npm start"
+    "dev": "tsx watch src/app.ts"
   },
   "dependencies": {
     "@langchain/community": "^0.3.19",
@@ -21,7 +21,6 @@
     "express-rate-limit": "^7.5.0",
     "ky": "^1.7.3",
     "lodash-es": "^4.17.21",
-    "nodemon": "^3.1.9",
     "ollama": "^0.5.11",
     "p-throttle": "^7.0.0",
     "pdf-parse": "^1.1.1",

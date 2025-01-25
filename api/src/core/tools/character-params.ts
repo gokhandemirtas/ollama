@@ -27,7 +27,7 @@ export const parameters = {
     },
     inventory: {
       type: "string",
-      description: `Comma seperated strong of weapons and items e.g. "Sword, Shield, Potion of Healing"`,
+      description: `List of weapons and items e.g. "Sword, Shield, Potion of Healing"`,
     },
     backstory: {
       type: "string",

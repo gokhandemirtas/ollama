@@ -17,4 +17,5 @@ export interface ICharacter {
   };
   inventory: string;
   backstory: string;
+  isDraft: boolean;
 }

@@ -37,14 +37,14 @@ export default function userRoutes(app: Application) {
   app.get("/conversations", async (request, reply, next) => {
     try {
       const conversations: any = await ChatController.fetchConversations();
-      const sorted = conversations.sort((a: IConversation, b: IConversation) => {
+      const sorted = conversations ? conversations.sort((a: IConversation, b: IConversation) => {
         const first = String(a.timestamp).split('.')[0];
         const second = String(b.timestamp).split('.')[0];
         if (first=== second) {
             return a.role === 'user' ? -1 : 1;
         }
         return 0;
-      });
+      }) : [];
       reply.type("application/json").status(200).send(sorted);
     } catch (error) {
       next(error);

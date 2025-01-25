@@ -20,6 +20,7 @@ export default function Prompt() {
 			.json()
 			.then(() => {
 				setQuery("");
+        setConversations([]);
 			});
 	}
 
@@ -52,6 +53,17 @@ export default function Prompt() {
     }, 300)
   }
 
+  function onDeleteHandler(conversationId: number) {
+    setConversations(conversations.filter((conversation) => conversation.id !== conversationId));
+  }
+
+  function onEnterHandler(e: React.KeyboardEvent) {
+    console.log(`Key pressed: ${e.key}`);
+    if (e.key === "Enter") {
+      submitQuery(e);
+    }
+  }
+
 	useEffect(() => {
 		getConversations();
     scrollToBottom();
@@ -68,7 +80,6 @@ export default function Prompt() {
 			})
 			.json()
 			.then((res: any) => {
-				console.log(res);
 				updateConversation();
 			})
 			.finally(() => {
@@ -80,7 +91,7 @@ export default function Prompt() {
 	return (
 		<>
 			<ErrorBoundary fallback={<ErrorBoundaryFallback errorText="" />}>
-				{conversations && conversations.map((conversation, index) => <Conversation conversation={conversation} callback={getConversations} key={index} />)}
+				{conversations && conversations.map((conversation, index) => <Conversation conversation={conversation} onDeleteHandler={onDeleteHandler} key={index} />)}
         <Panel className="mb-4">
 					<form className={inProgress ? "opacity-90 pointer-events-none" : ""} id="scroll-target">
 						<Field>
@@ -92,7 +103,8 @@ export default function Prompt() {
 						</Field>
 
 						<div>
-							<button type="submit" className="primary-button mt-4 float-right" disabled={query.length === 0 || inProgress} onClick={(e) => submitQuery(e)}>
+							<button type="submit" className="primary-button mt-4 float-right" disabled={query.length === 0 || inProgress} onClick={(e) => submitQuery(e)} onKeyDown={(e) => onEnterHandler(e)}>
+
 								Query
 							</button>
 							{conversations.length > 0 && (

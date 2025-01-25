@@ -20,6 +20,11 @@ export default function Characters() {
       });
   }
 
+  function onDeletedHandler(characterId: number){
+    setCharacters(characters.filter((char) => char.id !== characterId));
+
+  }
+
   useEffect(() => {
     getCharacters();
   }, [setCharacters]);
@@ -31,8 +36,12 @@ export default function Characters() {
           { characters.length === 0 && <p className="text-2xl text-gray-500 dark:text-gray-400">No characters found</p> }
           {
             characters.length > 0 &&
-            characters.map((character, index) => <Character key={index} character={character} onDeletedHandler={getCharacters} onSelectedHandler={setSelectedCharacter}/>
-          )}
+            characters.map((character, index) =>
+              <Character key={index} character={character}
+                onDeletedHandler={onDeletedHandler}
+                onSelectedHandler={setSelectedCharacter}/>
+            )
+          }
         </div>
         {selectedCharacter && <CharacterSheet character={selectedCharacter} />}
       </ErrorBoundary>

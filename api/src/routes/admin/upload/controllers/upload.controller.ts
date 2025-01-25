@@ -65,7 +65,7 @@ export async function handleFileUploadRequest(req: Request, res: Response, next:
 
     const contents = await loadDirectory(process.env.DOC_BUCKET!);
 
-    const result = await Promise.all([
+    await Promise.all([
         ...await contents.map(async(content) => {
           const throttled = throttle(async() => {
             return await updateKnowledge({content, metadatas, source, category});
@@ -74,7 +74,7 @@ export async function handleFileUploadRequest(req: Request, res: Response, next:
         })
       ]
     )
-
+    log.info(`[handleFileUploadRequest] Uploaded file: ${file.name}`);
     res.type("application/json").status(200).send(true);
   }
 }
