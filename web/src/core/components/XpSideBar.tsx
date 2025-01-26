@@ -5,6 +5,7 @@ import { Sidebar, SidebarBody, SidebarFooter, SidebarHeader, SidebarItem, Sideba
 import { Avatar } from "./catalyst/avatar";
 import { BeakerIcon } from "@heroicons/react/24/solid";
 import { CircleStackIcon } from "@heroicons/react/24/solid";
+import { CursorArrowRaysIcon } from "@heroicons/react/24/solid";
 import Logo from '../../assets/logo.png';
 import MyAvatar from '../../assets/avatars/avatar1.png';
 import { VariableIcon } from "@heroicons/react/24/solid";
@@ -50,6 +51,10 @@ export default function XpSideBar() {
           <SidebarItem href="/characters">
             <BeakerIcon />
             <SidebarLabel>My chars</SidebarLabel>
+          </SidebarItem>
+          <SidebarItem href="/designer">
+            <CursorArrowRaysIcon />
+            <SidebarLabel>New character</SidebarLabel>
           </SidebarItem>
           <SidebarItem href="/uploads">
             <Square2StackIcon />

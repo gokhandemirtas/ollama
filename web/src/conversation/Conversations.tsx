@@ -9,7 +9,7 @@ import { Panel } from "../core/components/Panel";
 import { SnarkBar } from "../core/components/SnarkBar";
 import api from "../core/services/HttpClient";
 
-export default function Prompt() {
+export default function Conversations() {
 	const [query, setQuery] = useState("");
 	const [conversations, setConversations] = useState<Array<IConversation>>([]);
 	const [inProgress, setInProgress] = useState(false);

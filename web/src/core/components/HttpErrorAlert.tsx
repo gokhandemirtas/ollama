@@ -23,7 +23,7 @@ export default function HttpErrorHandler() {
 
   return (
     <>
-      <Alert open={isOpen} onClose={setIsOpen} className="!border-1 !border-red-500">
+      <Alert open={isOpen} onClose={setIsOpen} className="!bottom-4 !absolute">
         <AlertTitle>Error while processing your request</AlertTitle>
         <AlertDescription className="!text-xs/6">
           { errorText }

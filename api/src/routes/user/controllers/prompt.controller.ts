@@ -1,53 +1,11 @@
-import { conversationSchema, knowledgeSchema } from "../../../core/schemas";
-import { desc, eq, l2Distance } from "drizzle-orm";
+import { embedder, getChatHistory, getKnowledge } from "../../../core/controllers/common.controller";
 import { getSystemPrompt, getUserPrompt } from "../../../core/prompt-templates/prompt-templates.";
 import toolPicker, { RetrieveCharacters } from "../../../core/tools";
 
-import { db } from "../../../core/providers/db.provider";
-import getEmbedding from "../../../core/providers/embedding.provider";
 import getLLM from "../../../core/providers/llm.provider";
 import { log } from "../../../core/providers/logger.provider";
 import timeSpan from 'time-span';
 import { updateChatHistory } from "../../admin/management/controllers/management.controller";
-
-async function getKnowledge(embedding: Array<number>) {
-	try {
-		const knowledge = await db.select().from(knowledgeSchema).orderBy(l2Distance(knowledgeSchema.embedding, embedding)).limit(1);
-		const flattenedKnowledge = knowledge ? knowledge.map((item) => item.content).join("\n") : "No previous knowledge available.";
-		return flattenedKnowledge;
-	} catch (error) {
-		log.error(`[getKnowledge] Knowledge retrieval failed: ${error}`);
-		return Promise.reject(error);
-	}
-}
-
-async function getChatHistory() {
-	try {
-		const chatHistory: any = await db.select().from(conversationSchema).where(eq(conversationSchema.role, "user")).orderBy(desc(conversationSchema.timestamp)).limit(500);
-		const flattenedChatHistory = chatHistory ? chatHistory.map((item: any) => `[${item?.role}] ${item?.content}`).join("\n") : "No previous conversation available.";
-		return flattenedChatHistory
-	} catch (error) {
-		log.error(`[getChatHistory] Chat history retrieval failed: ${error}`);
-		return Promise.reject(error);
-	}
-}
-
-async function embedder(userQuery: string) {
-	const response = await getEmbedding(userQuery);
-	const embedding = response.embedding;
-
-	if (!embedding || !Array.isArray(embedding)) {
-		log.error(`[embedder] Embedding invalid`);
-		return Promise.reject("Embedding invalid");
-	}
-
-	if (embedding && embedding.length !== 768) {
-		log.error(`[embedder] Embedding dimensions does not match the schema`);
-		return Promise.reject("Embedding dimensions does not match the schema");
-	}
-  // log.info(`[embedder] Embedding: ${embedding.length} dimensions`);
-	return embedding;
-}
 
 export async function promptController(userQuery: string, llmModel: string) {
   const llm = getLLM();
