@@ -23,19 +23,21 @@ export default function XpSideBar() {
             <ChevronDownIcon />
           </DropdownButton>
           <DropdownMenu className="min-w-80 lg:min-w-64" anchor="bottom start">
-            <DropdownItem href="/teams/1/settings">
-              <Cog8ToothIcon />
-              <DropdownLabel>Settings</DropdownLabel>
-            </DropdownItem>
-            <DropdownDivider />
             <DropdownItem href="/characters">
-              <StarIcon />
+              <BeakerIcon />
               <DropdownLabel>My chars</DropdownLabel>
             </DropdownItem>
-            <DropdownDivider />
-            <DropdownItem href="/teams/create">
-              <PlusIcon />
-              <DropdownLabel>New char&hellip;</DropdownLabel>
+            <DropdownItem href="/designer">
+              <SparklesIcon />
+              <DropdownLabel>New character</DropdownLabel>
+            </DropdownItem>
+            <DropdownItem href="/uploads">
+              <Square2StackIcon />
+              <DropdownLabel>Uploads</DropdownLabel>
+            </DropdownItem>
+            <DropdownItem href="/new-upload">
+              <TicketIcon />
+              <DropdownLabel>New upload</DropdownLabel>
             </DropdownItem>
           </DropdownMenu>
         </Dropdown>
@@ -53,7 +55,7 @@ export default function XpSideBar() {
             <SidebarLabel>My chars</SidebarLabel>
           </SidebarItem>
           <SidebarItem href="/designer">
-            <CursorArrowRaysIcon />
+            <SparklesIcon />
             <SidebarLabel>New character</SidebarLabel>
           </SidebarItem>
           <SidebarItem href="/uploads">
@@ -67,14 +69,6 @@ export default function XpSideBar() {
         </SidebarSection>
         <SidebarSpacer />
         <SidebarSection>
-          <SidebarItem href="/support">
-            <QuestionMarkCircleIcon />
-            <SidebarLabel>Support</SidebarLabel>
-          </SidebarItem>
-          <SidebarItem href="/changelog">
-            <SparklesIcon />
-            <SidebarLabel>Changelog</SidebarLabel>
-          </SidebarItem>
           <SidebarItem>
             <CircleStackIcon/>
             <SidebarLabel  className={healthCheckResults.isDbOnline ? "!text-green-500" : "!text-red-500 animate-pulse"} >DB</SidebarLabel>
@@ -100,24 +94,6 @@ export default function XpSideBar() {
             <ChevronUpIcon />
           </DropdownButton>
           <DropdownMenu className="min-w-64" anchor="top start">
-            <DropdownItem href="/my-profile">
-              <UserIcon />
-              <DropdownLabel>My profile</DropdownLabel>
-            </DropdownItem>
-            <DropdownItem href="/settings">
-              <Cog8ToothIcon />
-              <DropdownLabel>Settings</DropdownLabel>
-            </DropdownItem>
-            <DropdownDivider />
-            <DropdownItem href="/privacy-policy">
-              <ShieldCheckIcon />
-              <DropdownLabel>Privacy policy</DropdownLabel>
-            </DropdownItem>
-            <DropdownItem href="/share-feedback">
-              <LightBulbIcon />
-              <DropdownLabel>Share feedback</DropdownLabel>
-            </DropdownItem>
-            <DropdownDivider />
             <DropdownItem href="/logout">
               <ArrowRightStartOnRectangleIcon />
               <DropdownLabel>Sign out</DropdownLabel>

@@ -4,11 +4,11 @@ export function getSystemPrompt(topic = 'Dungeons and Dragons') {
   return `
     Comment on name, use witticisms. Check if the name is a fitting choice for the race user picked.
     ---
-    Comment on race, class, alignment combination, based on your knowledge of ${topic}. Let the user e.g. an elf can not be a barbarian
+    Comment on race, class, alignment combination. Let the user e.g. an elf can not be a barbarian
     ---
-    You will roll for stats when asked, make sure the stats are compatible with the game system: ${topic},
-    and suitable for chosen race and class. Return the results as a JSON object that follows the format:
-    {str: 10, dex: 12, con: 14, int: 16, wis: 18, cha: 20}
+    You will roll for ability scores when asked, make sure the ability scores are compatible with the game system: ${topic},
+    and suitable for chosen race and class. Return the results as a parsable JSON object that follows the format:
+    {str: 10, dex: 12, con: 14, int: 16, wis: 18, cha: 20}, do not make any other comments and only return a JSON object.
     ---
     You will write a backstory when asked, make sure the backstory is suitable for the race, class, alignment and beliefs. If user provides a brief history, you will expand on it.
     ---

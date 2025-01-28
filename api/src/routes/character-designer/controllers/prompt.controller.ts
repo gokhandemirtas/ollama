@@ -20,7 +20,7 @@ export async function assistantPromptController(userQuery: string, llmModel: str
 	try {
     const timer = timeSpan();
 		const embedding = await embedder(userQuery);
-		const flattenedKnowledge = await getKnowledge(embedding);
+		const flattenedKnowledge = await getKnowledge(embedding, null, 5);
 		const userPrompt = getUserPrompt(userQuery, flattenedKnowledge);
 
 		const messages = [

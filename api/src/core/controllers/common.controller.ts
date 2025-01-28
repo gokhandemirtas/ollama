@@ -5,18 +5,18 @@ import { db } from "../providers/db.provider";
 import getEmbedding from "../providers/embedding.provider";
 import { log } from "../providers/logger.provider";
 
-export async function getKnowledge(embedding: Array<number>, category?: string) {
+export async function getKnowledge(embedding: Array<number>, category?: string | null , limit = 1) {
 	try {
     let knowledge;
     if (category) {
       knowledge = await db.select().from(knowledgeSchema)
                     .where(eq(knowledgeSchema.metadata, category))
                     .orderBy(l2Distance(knowledgeSchema.embedding, embedding))
-                    .limit(1);
+                    .limit(limit);
     } else {
       knowledge = await db.select().from(knowledgeSchema)
                           .orderBy(cosineDistance(knowledgeSchema.embedding, embedding))
-                          .limit(3);
+                          .limit(limit);
     }
 
 		const flattenedKnowledge = knowledge ? knowledge.map((item) => item.content).join("\n") : "No previous knowledge available.";
