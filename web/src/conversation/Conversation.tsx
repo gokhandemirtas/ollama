@@ -20,7 +20,14 @@ export default function Conversation({conversation, onDeleteHandler, onMarkdownE
       return <ul className="flex flex-wrap gap-1 mt-1 mb-1">{ props.children }</ul>
     },
     li(props) {
-      return <li><button className="markdown-button" onClick={(e) => onMarkdownEvent(props.children)}>{ props?.children }</button></li>
+      const oneWord = typeof props?.children === 'string';
+      return <li>
+        { oneWord ?
+          <button className="markdown-button" onClick={(e) => onMarkdownEvent(props.children)}>
+          { props?.children }
+          </button> : props?.children
+        }
+      </li>
     }
   }
 

@@ -6,6 +6,7 @@ interface CharacterMetaState {
   races: Array<string>;
   alignments: Array<string>;
   fetchCharacterMeta: () => Promise<void>;
+  updateCharacterMeta: () => Promise<void>;
 }
 
 const useCharacterMetaStore = create<CharacterMetaState>((set) => ({
@@ -13,20 +14,21 @@ const useCharacterMetaStore = create<CharacterMetaState>((set) => ({
   races: [],
   alignments: [],
   fetchCharacterMeta: async () => {
-    if (localStorage.getItem('characterMeta')) {
-      const data = JSON.parse(localStorage.getItem('characterMeta')!);
-      set({ classes: data.classes, races: data.races, alignments: data.alignments });
-      return
-    }
     try {
-      const response = await api.post(`${import.meta.env.VITE_BACKEND_URL}/character-meta`, {
-        json: { query: "Get character meta" },
+      const response = await api.get(`${import.meta.env.VITE_BACKEND_URL}/character-meta`, {
         timeout: import.meta.env.VITE_TIMEOUT
       });
-      const json = await response.json() as any;
-      const data = JSON.parse(json);
-      localStorage.setItem('characterMeta', json);
+      const data = await response.json() as any;
       set({ classes: data.classes, races: data.races, alignments: data.alignments });
+    } catch (error) {
+      console.error('Failed to fetch character meta:', error);
+    }
+  },
+  updateCharacterMeta: async () => {
+    try {
+      await api.get(`${import.meta.env.VITE_BACKEND_URL}/update-meta`, {
+        timeout: import.meta.env.VITE_TIMEOUT
+      });
     } catch (error) {
       console.error('Failed to fetch character meta:', error);
     }

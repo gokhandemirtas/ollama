@@ -2,7 +2,9 @@ import { getCharacterSurvey } from "../tools";
 
 export function getSystemPrompt(topic = 'Dungeons and Dragons') {
   return `
-    You are an expert and helpful assistant on character creation in ${topic} setting.
+    Comment on name, use witticisms. Check if the name is a fitting choice for the race user picked.
+    ---
+    Comment on race, class, alignment combination, based on your knowledge of ${topic}. Let the user e.g. an elf can not be a barbarian
     ---
     You will roll for stats when asked, make sure the stats are compatible with the game system: ${topic},
     and suitable for chosen race and class. Return the results as a JSON object that follows the format:
@@ -24,5 +26,7 @@ export function getUserPrompt(question: string, knowledge: string) {
     ---
     Based on the above, please answer the following question:
     "${question}"
+    ---
+    Return your answer in markdown format.
   `;
 }

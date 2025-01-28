@@ -29,7 +29,6 @@ export default function Conversations() {
 			.get(`${import.meta.env.VITE_BACKEND_URL}/conversations`)
 			.json()
 			.then((res: any) => {
-				console.log(res);
 				setConversations(res);
 			});
 	}
@@ -39,7 +38,6 @@ export default function Conversations() {
 			.get(`${import.meta.env.VITE_BACKEND_URL}/conversations`)
 			.json()
 			.then((res: any) => {
-				console.log(res);
 				setConversations(res);
 			});
 	}

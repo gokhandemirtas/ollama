@@ -33,6 +33,7 @@ export default function App() {
             <Route path="/new-upload" element={<FileUploader />} />
             <Route path="/characters" element={<Characters />} />
             <Route path="/designer" element={<CharacterDesigner />} />
+            <Route path="/" element={<Conversations />} />
           </Routes>
         </Router>
       </Layout>

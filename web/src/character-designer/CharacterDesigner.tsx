@@ -1,113 +1,88 @@
 import { Field, Fieldset, Input, Select, Textarea } from "@headlessui/react";
 import { useEffect, useState } from "react";
 
+import CharacterForm from "./CharacterForm";
 import { ErrorBoundary } from "react-error-boundary";
 import { ErrorBoundaryFallback } from "../core/components/ErrorBoundaryFallback";
 import { ICharacter } from "../core/models/character";
+import Markdown from "react-markdown";
 import { Panel } from "../core/components/Panel";
-import { PhotoIcon } from "@heroicons/react/16/solid";
+import { SnarkBar } from "../core/components/SnarkBar";
 import api from "../core/services/HttpClient";
-import { use } from "framer-motion/client";
+import { getPortrait } from "../core/utils/portrait-picker";
 import useCharacterMetaStore from "../core/store/character-meta.store";
-
-const formDefaults: ICharacter = {
-  name: "",
-  race: "",
-  class: "",
-  alignment: "",
-  abilityScores: { str: 0, dex: 0, con: 0, int: 0, wis: 0, cha: 0 },
-  level: { level: 0, experience: 0 },
-  inventory: "",
-  backstory: "",
-}
 
 export default function CharacterDesigner() {
   const [inProgress, setInProgress] = useState(false);
-  const [formState, setFormState] = useState(formDefaults);
-  const [error, setError] = useState("");
-  const { classes, races, alignments } = useCharacterMetaStore();
-  const [inventory, setInventory] = useState<string[]>([]);
+  const [suggestion, setSuggestion] = useState<string>("Hello. I'll help you with this journey");
+  const [timeout, setDelayTimeout] = useState(0);
+  const [portrait, setPortrait] = useState('');
 
-  function handleInputChange(e: React.ChangeEvent<HTMLInputElement>){
-    const { name, value } = e.target;
-    setFormState((prevState) => ({
-      ...prevState,
-      [name]: value,
-    }));
-  };
+  function askAssistant(query: string) {
+    console.log(query)
+    if (!query || inProgress) return;
+    clearTimeout(timeout);
+    const timer = setTimeout(() => {
+      setInProgress(true);
+      api.post(`${import.meta.env.VITE_BACKEND_URL}/assistant`, {
+        json: { query },
+        timeout: import.meta.env.VITE_TIMEOUT,
+      })
+        .then((res) => res.json())
+        .then((res: any) => {
+          if (res) {
+            setSuggestion(res.message.content);
+          }
 
-  function resetForm() {
-    setFormState(formDefaults);
-    setError('');
-  };
+        })
+        .finally(() => {
+          setInProgress(false);
+        });
+    }, 3000);
+    setDelayTimeout(timer);
+  }
 
-  function submitForm(e: React.FormEvent) {
+  function submitForm(character: ICharacter) {
 
   }
+
+  useEffect(() => {
+    const portrait = getPortrait(null as any);
+    console.log(portrait)
+    setPortrait(portrait!);
+  }, [
+    setPortrait
+  ])
 
   return (
     <>
       <ErrorBoundary fallback={<ErrorBoundaryFallback errorText=""/>}>
-      <Panel>
-        <form>
-          <Fieldset className="mb-2">
-            <Field>
-              <Input type="text"
-                maxLength={30} required
-                id="name"
-                name="name"
-                placeholder="Character full name"
-                onChange={handleInputChange}
-                className="input-override w-full !color-scheme:dark"
-                value={formState.name}/>
-            </Field>
-            <Field>
-              <Select name="race" onChange={(e) => handleInputChange(e as any)} className="input-override w-full !color-scheme:dark" required>
-                <option>Pick a race</option>
-                { races ? races.map((c) => <option key={c} value={c}>{c}</option>) : null }
-              </Select>
-            </Field>
-            <Field>
-              <Select name="class" onChange={(e) => handleInputChange(e as any)} className="input-override w-full !color-scheme:dark" required>
-                <option>Pick a class</option>
-                { classes ? classes.map((c) => <option key={c} value={c}>{c}</option>): null }
-              </Select>
-            </Field>
-            <Field>
-              <Select name="alignment" onChange={(e) => handleInputChange(e as any)} className="input-override w-full !color-scheme:dark" required>
-                <option>Pick an alignment</option>
-                { alignments ? alignments.map((c) => <option key={c} value={c}>{c}</option>): null }
-              </Select>
-            </Field>
-            <Field>
-              <Textarea maxLength={800} required
-                id="class"
-                name="backstory"
-                placeholder="Your characters background story"
-                onChange={(error) => handleInputChange(error as any)}
-                className="input-override w-full !color-scheme:dark"
-                value={formState.backstory}>
-              </Textarea>
-            </Field>
-          </Fieldset>
-          { error &&
-            <div className="bg-red-500 p-1 px-2 mb-4 text-yellow-50 text-xs/6 rounded-lg">{ error }</div>
-          }
-          <div className="flex justify-end">
-            <button type="button" className="cancel-button" disabled={inProgress} onClick={resetForm}>
-              Cancel
-            </button>
-            <button
-              type="submit"
-              className="primary-button ml-4"
-              onClick={(e) => submitForm(e)}
-              disabled={inProgress}
-            >
-              Save
-            </button>
-          </div>
-        </form>
-      </Panel>
+      <section className="grid grid-cols-6 gap-0 !w-full">
+        <aside className="col-span-4">
+          <Panel>
+            <CharacterForm
+              onFormUpdateHandler={askAssistant}
+              onPortraitChangeHandler={setPortrait}
+              onSubmitHandler={submitForm}
+              inProgress={inProgress}
+            />
+          </Panel>
+        </aside>
+        <aside  className="col-span-2">
+          <Panel className="!p-0 !border-none !w-full !sm:w-full !lg:w-full !rounded-lg !bg-black">
+            <figure className="!rounded-tl-lg !rounded-tr-lg overflow-hidden">
+              <img src={portrait} />
+            </figure>
+            <div className="p-2 bg-white rounded-bl-lg rounded-br-lg">
+              { inProgress ? <SnarkBar className="text-black text-xs" /> :
+                <Markdown className="text-xs">
+                  { suggestion }
+                </Markdown>
+              }
+            </div>
+          </Panel>
+        </aside>
+      </section>
       </ErrorBoundary>
     </>
   );

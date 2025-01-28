@@ -29,7 +29,7 @@ app.use(pinoHttp);
 app.use(json());
 app.use(cors({ origin: process.env.WEB_APP_URL! }));
 app.use(fileUpload());
-app.use(limiter);
+// app.use(limiter);
 app.use(expressErrorMiddleware);
 setRoutes(app);
 

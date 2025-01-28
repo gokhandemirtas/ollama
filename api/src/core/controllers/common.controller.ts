@@ -1,5 +1,5 @@
 import { conversationSchema, knowledgeSchema } from "../schemas";
-import { desc, eq, l2Distance } from "drizzle-orm";
+import { cosineDistance, desc, eq, l2Distance } from "drizzle-orm";
 
 import { db } from "../providers/db.provider";
 import getEmbedding from "../providers/embedding.provider";
@@ -15,8 +15,8 @@ export async function getKnowledge(embedding: Array<number>, category?: string) 
                     .limit(1);
     } else {
       knowledge = await db.select().from(knowledgeSchema)
-                          .orderBy(l2Distance(knowledgeSchema.embedding, embedding))
-                          .limit(1);
+                          .orderBy(cosineDistance(knowledgeSchema.embedding, embedding))
+                          .limit(3);
     }
 
 		const flattenedKnowledge = knowledge ? knowledge.map((item) => item.content).join("\n") : "No previous knowledge available.";

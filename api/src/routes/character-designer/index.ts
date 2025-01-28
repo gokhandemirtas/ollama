@@ -1,24 +1,41 @@
+import { assistantPromptController, metaPromptController } from "./controllers/prompt.controller";
+
 import { Application } from "express";
 import { CharacterController } from "./controllers/character.controller";
-import { log } from "../../core/providers/logger.provider";
-import { metaPromptController } from "./controllers/prompt.controller";
-
-const redis = require('redis');
-const expressRedisCache = require('express-redis-cache');
-const redisClient = redis.createClient();
-const cache = expressRedisCache({ client: redisClient });
+import { MetaController } from "./controllers/meta.controller";
 
 export default function characterDesignerRoutes(app: Application) {
-  app.post("/character-meta", cache.route(), async (request, reply, next) => {
+  app.get("/update-meta", async (request, reply, next) => {
     try {
-      /* const userQuery = request.body.query as string;
-      const response = await metaPromptController(userQuery, process.env.LLM_MODEL!); */
-      log.info('character-meta');
-      reply.type("application/json").status(200).send({
-        classes: ["Warrior", "Mage", "Rogue"],
-        races: ["Human", "Elf", "Dwarf"],
-        alignments: ["Good", "Neutral", "Evil"],
-      });
+      const userQuery = request.body.query as string;
+      const response = await metaPromptController(userQuery, process.env.LLM_MODEL!);
+      console.log(response);
+      await MetaController.updateMeta();
+      reply.type("application/json").status(200).send(true);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.get("/character-meta", async (request, reply, next) => {
+    try {
+      const response = await MetaController.fetchMeta();
+      reply.type("application/json").status(200).send(response);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.post("/assistant", async (request, reply, next) => {
+    try {
+      const userQuery = request.body.query as string;
+      console.log(userQuery);
+      if (userQuery !== '') {
+        const response = await assistantPromptController(userQuery, process.env.LLM_MODEL!);
+        reply.type("application/json").status(200).send(response);
+      } else {
+        reply.type("application/json").status(400).send("Empty query");
+      }
     } catch (error) {
       next(error);
     }
