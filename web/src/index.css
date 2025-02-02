@@ -39,3 +39,7 @@ body, html {
 .input-override {
   @apply border !border-slate-400 rounded-lg my-2 !text-stone-900 text-xs/6;
 }
+
+.error-text {
+  @apply text-red-500 text-xs/6;
+}

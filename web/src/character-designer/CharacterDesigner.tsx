@@ -9,27 +9,33 @@ import { Panel } from "../core/components/Panel";
 import { SnarkBar } from "../core/components/SnarkBar";
 import api from "../core/services/HttpClient";
 import { getPortrait } from "../core/utils/portrait-picker";
+import { getRandomGreeting } from "../core/services/Greeter";
 
 export default function CharacterDesigner() {
   const [inProgress, setInProgress] = useState(false);
-  const [suggestion, setSuggestion] = useState<string>("Hello. I'll help you with this journey");
+  const [suggestion, setSuggestion] = useState<string>(getRandomGreeting());
   const [portrait, setPortrait] = useState('');
 
-  function submitForm(character: ICharacter) {
-
+  async function submitForm(character: ICharacter) {
+    setInProgress(true);
+    try {
+      await api.post<ICharacter>('/character', { json: character })
+    } catch (error) {
+      console.error(error);
+    }
   }
 
   useEffect(() => {
     const portrait = getPortrait(null as any);
-    console.log(portrait)
     setPortrait(portrait!);
   }, [setPortrait])
 
   return (
     <>
-      <section className="grid grid-cols-6 gap-0 !w-full">
-        <aside className="col-span-4">
+      <section className="grid grid-cols-12 !gap-0 !w-full">
+        <aside className="col-span-5">
           <Panel>
+            <img src={portrait} className="rounded-lg mb-2"/>
             <CharacterForm
               onNewSuggestion={setSuggestion}
               onPortraitChangeHandler={setPortrait}
@@ -37,17 +43,13 @@ export default function CharacterDesigner() {
             />
           </Panel>
         </aside>
-        <aside  className="col-span-2">
+        <aside  className="col-span-7">
         <ErrorBoundary fallback={<ErrorBoundaryFallback errorText=""/>}>
           <Panel className="!p-0 !border-none !w-full !sm:w-full !lg:w-full !rounded-lg !bg-black">
-            <figure className="!rounded-tl-lg !rounded-tr-lg overflow-hidden">
-              <img src={portrait} />
-            </figure>
-            <div className="p-2 bg-white rounded-bl-lg rounded-br-lg">
+            <div className="p-2 bg-white rounded-md flex-wrap text-xs">
+
               { inProgress ? <SnarkBar className="text-black text-xs" /> :
-                <Markdown className="text-xs">
-                  { suggestion }
-                </Markdown>
+                <Markdown className="flex-wrap text-xs">{ suggestion }</Markdown>
               }
             </div>
           </Panel>

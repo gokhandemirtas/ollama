@@ -2,7 +2,7 @@ export interface ICharacter {
   id?: number;
   name: string;
   race: string;
-  class: string;
+  chrClass: string;
   alignment: string;
   abilityScores: {
     str: number;

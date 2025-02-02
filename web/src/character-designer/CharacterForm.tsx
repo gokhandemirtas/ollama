@@ -1,4 +1,6 @@
-import { Button, Field, Fieldset, Input, Label, Select, Textarea } from "@headlessui/react";
+import { Button, Input, Select, Textarea } from "@headlessui/react";
+import { ErrorMessage, Field, Form, Formik, useFormik, useFormikContext } from 'formik';
+import { initialValues, validationSchema } from "./form-schema";
 import { useEffect, useState } from "react";
 
 import { ArrowPathIcon } from "@heroicons/react/24/solid";
@@ -9,29 +11,37 @@ import api from "../core/services/HttpClient";
 import { getPortrait } from "../core/utils/portrait-picker";
 import useCharacterMetaStore from "../core/store/character-meta.store";
 
-const formDefaults: ICharacter = {
-  name: "",
-  race: "",
-  class: "",
-  alignment: "",
-  abilityScores: { str: 0, dex: 0, con: 0, int: 0, wis: 0, cha: 0 },
-  level: { level: 0, experience: 0 },
-  inventory: "",
-  backstory: "",
-}
-
 export default function CharacterForm({ onPortraitChangeHandler, onNewSuggestion, onSubmitHandler, character  }: {
   onPortraitChangeHandler: (portrait: string) => void;
   onNewSuggestion: (suggestion: string) => void;
   onSubmitHandler: (character: ICharacter) => void;
   character?: ICharacter;
 }) {
-  const [formState, setFormState] = useState(formDefaults);
-  const [error, setError] = useState<{ [key: string]: string }>({});
+
   const [inProgress, setInProgress] = useState(false);
   const [timeout, setDelayTimeout] = useState(0);
   const { classes, races, alignments } = useCharacterMetaStore();
-  const [inventory, setInventory] = useState<string[]>([]);
+  const [portraitParams, setPortraitParams] = useState({ race: '', chrClass: '' });
+  const [assistantError, setAssistantError] = useState<string>();
+
+  const formik = useFormik({
+    initialValues,
+    onSubmit: values => {
+      onSubmitHandler(values);
+      alert(JSON.stringify(values, null, 2));
+    },
+  });
+
+  useEffect(() => {
+    if (portraitParams.chrClass && portraitParams.race) {
+      const image = getPortrait(portraitParams as any);
+      onPortraitChangeHandler(image!);
+    }
+  }, [portraitParams])
+
+  function portraitChange(field: string, value: string) {
+    setPortraitParams({ ...portraitParams, [field]: value });
+  }
 
   function askAssistant(query: string, callback?: (res: any) => void) {
     console.log(query)
@@ -55,17 +65,12 @@ export default function CharacterForm({ onPortraitChangeHandler, onNewSuggestion
     setDelayTimeout(timer);
   }
 
-  useEffect(() => {
-    const portrait = getPortrait(formState);
-    onPortraitChangeHandler(portrait!);
-  }, [formState, classes]);
-
   function getSummary() {
-    if (formState.name && formState.race && formState.class && formState.alignment) {
+    if (formik.values) {
       let query = '';
-      Object.keys(formState).forEach(key => {
+      Object.keys(formik.values).forEach(key => {
         if (["race", "alignment", "class", "name"].includes(key)) {
-          query += `${key}: ${formState[key]}, `
+          query += `${key}: ${formik.values[key]}, `
         }
       });
       console.log(`query: ${query}`);
@@ -75,178 +80,232 @@ export default function CharacterForm({ onPortraitChangeHandler, onNewSuggestion
     }
   }
 
-  function handleInputChange(e: React.ChangeEvent<HTMLInputElement>){
-    const { name, value } = e.target;
-    setFormState((prevState) => ({
-      ...prevState,
-      [name]: value,
-    }));
-    validateForm();
-  };
 
   function generateBackstory() {
-    const query = getSummary();
-    if(query) {
-      askAssistant(
-        `My character is a: ${query}, please generate a backstory for me.`,
-        (res) => {
-          setFormState((prevState) => ({
-            ...prevState,
-            backstory: res,
-          }))
-        });
+    const { setFieldValue } = useFormikContext();
+    if (formik.values.name && formik.values.race && formik.values.chrClass && formik.values.alignment) {
+      const query = getSummary();
+      if(query) {
+        askAssistant(
+          `My character is a: ${query}, please generate a backstory for me.`,
+          (res) => {
+            setFieldValue('backstory', res.backstory);
+          });
+      }
     } else {
-      validateForm();
+      setAssistantError('Please fill out name, race, class and alignment.');
     }
   }
 
   function roll() {
-    if(formState.race && formState.class) {
+    const { setFieldValue } = useFormikContext();
+     if(formik.values.race && formik.values.chrClass) {
       askAssistant(
-        `My character is a ${formState.race} ${formState.class}, please roll my ability scores.`,
+        `My character is a ${formik.values.race} & ${formik.values.chrClass}, please roll my ability scores.`,
         (res) => {
-          setFormState((prevState) => ({
-            ...prevState,
-            abilityScores: {
-              ...res.abilityScores,
-            },
-          }))
+          console.log(res);
+          /* Object.keys(res.abilityScores).forEach(key => {
+            setFieldValue(`abilityScores.${key}`, res.abilityScores[key]);
+          }); */
         });
     } else {
-      validateForm(['race', 'class']);
+      setAssistantError('Please fill out race and class.');
     }
   }
 
-  function validateForm(fields = ['name', 'race', 'class', 'alignment']) {
-    let newError: {[key:string]: string} = {};
-    fields.map((field) => {
-      if (!formState[field as keyof typeof formState]) {
-        newError[field] = `Please fill out the ${field}`;
-      }
-    })
-
-    setError(newError);
-  }
-
   function analyze() {
-    const query = getSummary();
-    if(query) {
-      askAssistant(`My character is a: ${query}, please analyze the character for me.`);
+    if (formik.values.name && formik.values.race && formik.values.chrClass && formik.values.alignment) {
+      const query = getSummary();
+      console.log('this is the query', query);
+      if(query) {
+        askAssistant(`My character is a: ${query}, please analyze the character for me.`);
+      }
     } else {
-      validateForm();
+      setAssistantError('Please fill out name, race, class and alignment.');
     }
   }
 
   function resetForm() {
-    setFormState(formDefaults);
-    setError({});
+ /*    setFormState(initialValues);
+    setError({}); */
   };
 
 
   return (
     <>
     <ErrorBoundary fallback={<ErrorBoundaryFallback errorText=""/>}>
-    <form>
-      <Fieldset className="mb-2">
-        <Field>
-          <Label htmlFor="name" className="font-bold text-xs">
-            Character Name
-            { error.name ? <span className="text-red-600 ml-6">{ error.name }</span> : null }
-          </Label>
-          <Input type="text"
-            maxLength={30} required
-            id="name"
-            name="name"
-            placeholder="Character full name"
-            onChange={handleInputChange}
-            className="input-override w-full !color-scheme:dark"
-            value={formState.name}/>
+    <Formik
+      initialValues={initialValues}
+      validationSchema={validationSchema}
+      onSubmit={onSubmitHandler}>
+        {formik => (
+          <Form>
+            <div className="flex gap-2">
+              <aside className="flex-col">
+                <Field name="name" className="flex">
+                  {({ field }) => (
+                    <>
+                      <label htmlFor="name" className="font-bold text-xs">
+                        Name
+                      </label>
+                      <Input
+                        type="text"
+                        id="name"
+                        placeholder="Character full name"
+                        {...field}
+                        className="input-override w-full !color-scheme:dark"
+                      />
+                      <ErrorMessage
+                        component="div"
+                        name="name"
+                        className="error-text " />
+                    </>
+                  )}
+                </Field>
+                <Field name="chrClass">
+                  {({ field }) => (
+                    <>
+                      <label htmlFor="chrClass" className="font-bold text-xs">
+                        Class
+                      </label>
+                      <Select
+                        {...field}
+                        className="input-override w-full !color-scheme:dark"
+                        onChange={(e) => {
+                          field.onChange(e);
+                          portraitChange('chrClass', e.target.value);
+                        }}
+                      >
+                        <option value="">Pick a class</option>
+                        {classes ? classes.map((c) => (
+                          <option key={c} value={c}>{c}</option>
+                        )) : null}
+                      </Select>
+                      <ErrorMessage component="div" name="chrClass" className="error-text" />
+                    </>
+                  )}
+                </Field>
+              </aside>
+              <aside className="flex-col">
+              <Field name="race">
+                  {({ field }) => (
+                    <>
+                      <label htmlFor="race" className="font-bold text-xs">
+                        Race
+                      </label>
+                      <Select
+                        {...field}
+                        className="input-override w-full !color-scheme:dark"
+                        onChange={(e) => {
+                          field.onChange(e);
+                          portraitChange('race', e.target.value);
+                        }}
+                      >
+                        <option value="">Pick a race</option>
+                        {races ? races.map((c) => (
+                          <option key={c} value={c}>{c}</option>
+                        )) : null}
+                      </Select>
+                      <ErrorMessage component="div" name="race" className="error-text" />
+                    </>
+                  )}
+                </Field>
+                <Field name="alignment">
+                  {({ field }) => (
+                    <>
+                      <label htmlFor="alignment" className="font-bold text-xs">
+                      Alignment
+                      </label>
+                      <Select
+                        {...field}
+                        className="input-override w-full !color-scheme:dark"
+                      >
+                        <option value="">Pick an alignment</option>
+                        {alignments ? alignments.map((c) => (
+                          <option key={c} value={c}>{c}</option>
+                        )) : null}
+                      </Select>
+                      <ErrorMessage component="div" name="alignment" className="error-text" />
+                    </>
+                  )}
+                </Field>
+              </aside>
+            </div>
+            <div>
+              <Field name="inventory">
+                {({ field }) => (
+                  <>
+                    <label htmlFor="inventory" className="font-bold text-xs">
+                      Inventory
+                    </label>
+                    <Textarea
+                      {...field}
+                      className="input-override w-full !color-scheme:dark"
+                    >
+                    </Textarea>
+                    <ErrorMessage component="div" name="inventory" className="error-text" />
+                  </>
+                )}
+              </Field>
+              <aside className="!relative">
+                <Field name="backstory">
+                  {({ field }) => (
+                    <>
+                      <label htmlFor="backstory" className="font-bold text-xs">
+                        Character backstory
+                      </label>
+                      <Textarea
+                        {...field}
+                        className="input-override w-full !color-scheme:dark"
+                      >
+                      </Textarea>
+                      <ErrorMessage component="div" name="backstory" className="error-text" />
+                      <ArrowPathIcon
+                        className="absolute right-2 top-2 text-black size-5 hover:text-emerald-600 cursor-pointer" onClick={generateBackstory} />
+                    </>
+                  )}
+                </Field>
+              </aside>
+              <aside className="flex gap-2">
+              <Field name="abilityScores">
+                  {({ field }) => (
+                    <>
+                      {Object.keys(field.value).map((key) => (
+                        <div key={key} className="flex flex-col mb-2">
+                          <label htmlFor={`abilityScores.${key}`} className="font-bold text-xs">
+                            {key.charAt(0).toUpperCase() + key.slice(1)}
+                          </label>
+                          <Input
+                            type="number"
+                            id={`abilityScores.${key}`}
+                            {...formik.getFieldProps(`abilityScores.${key}`)}
+                            className="input-override w-full !color-scheme:dark"
+                          />
 
-        </Field>
-        <Field>
-          <Label htmlFor="race" className="font-bold text-xs">
-            Character race
-            { error.race ? <span className="text-red-600 ml-6">{ error.race }</span> : null }
-          </Label>
-          <Select name="race" onChange={(e) => handleInputChange(e as any)} className="input-override w-full !color-scheme:dark" required>
-            <option>Pick a race</option>
-            { races ? races.map((c) => <option key={c} value={c}>{c}</option>) : null }
-          </Select>
-        </Field>
-        <Field>
-          <Label htmlFor="class" className="font-bold text-xs">
-            Character class
-            { error.class ? <span className="text-red-600 ml-6">{ error.class }</span> : null }
-          </Label>
-          <Select name="class" onChange={(e) => handleInputChange(e as any)} className="input-override w-full !color-scheme:dark" required>
-            <option>Pick a class</option>
-            { classes ? classes.map((c) => <option key={c} value={c}>{c}</option>): null }
-          </Select>
-        </Field>
-        <Field>
-          <Label htmlFor="alignment" className="font-bold text-xs">
-            Character alignment
-            { error.alignment ? <span className="text-red-600 ml-6">{ error.alignment }</span> : null }
-          </Label>
-          <Select name="alignment" onChange={(e) => handleInputChange(e as any)} className="input-override w-full !color-scheme:dark" required>
-            <option>Pick an alignment</option>
-            { alignments ? alignments.map((c) => <option key={c} value={c}>{c}</option>): null }
-          </Select>
-        </Field>
-        <Field className="relative">
-          <Label htmlFor="backstory" className="font-bold text-xs">
-            Character backstory
-            { error.backstory ? <span className="text-red-600 ml-6">{ error.backstory }</span> : null }
-          </Label>
-          <Textarea maxLength={800} required
-            id="class"
-            name="backstory"
-            placeholder="Your characters background story"
-            onChange={(error) => handleInputChange(error as any)}
-            className="input-override w-full !color-scheme:dark"
-            value={formState.backstory}>
-          </Textarea>
-          <ArrowPathIcon className="absolute top-4 right-2 size-5 hover:text-emerald-500 cursor-pointer" onClick={generateBackstory}/>
-        </Field>
-        <Field>
-          {
-            Object.keys(formState.abilityScores).map((key) => {
-              return (
-                <span key={key}>
-                  <Label className="font-bold text-xs mr-1">{ String(key).toUpperCase() }</Label>
-                  <Input type="number" min={0} max={30} required
-                    name={key}
-                    placeholder={key}
-                    onChange={handleInputChange}
-                    className="input-override !color-scheme:dark mr-2 w-10 select-none"
-                    value={formState.abilityScores[key as keyof typeof formState.abilityScores]}
-                  />
-                </span>
-              )
-            })
-          }
-          <Button className="primary-button" onClick={roll}>Roll</Button>
-        </Field>
-      </Fieldset>
-      <div className="flex justify-end">
-        <Button type="button" className="cancel-button" disabled={inProgress} onClick={resetForm}>
-          Reset
-        </Button>
-
-        <Button type="button" className="primary-button ml-4" disabled={inProgress} onClick={analyze}>
-          Analyze
-        </Button>
-
-        <Button
-          type="submit"
-          className="primary-button ml-4"
-          onClick={(e) => onSubmitHandler(e)}
-          disabled={inProgress}
-        >
-          Save
-        </Button>
-      </div>
-    </form>
+                        </div>
+                      ))}
+                    </>
+                  )}
+                </Field>
+              </aside>
+            </div>
+            <nav className="flex justify-end">
+              <Button className="secondary-button" type="button" onClick={resetForm}>
+                Reset
+              </Button>
+              <Button className="outline-button ml-2" type="button" onClick={analyze} disabled={formik.isSubmitting}>
+                Analyze
+              </Button>
+              <Button className="outline-button ml-2" type="button" onClick={roll} disabled={formik.isSubmitting}>
+                Roll
+              </Button>
+              <Button className="primary-button ml-2" type="submit" disabled={formik.isSubmitting}>
+                Submit
+              </Button>
+            </nav>
+          </Form>
+        )}
+      </Formik>
     </ErrorBoundary>
     </>
   )
