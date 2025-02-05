@@ -17,5 +17,7 @@ export interface ICharacter {
   };
   inventory: string;
   backstory: string;
+  armorClass: number;
+  proficiencies: string;
   isDraft: boolean;
 }

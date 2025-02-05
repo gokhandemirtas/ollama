@@ -2,19 +2,20 @@ import { getCharacterSurvey } from "../tools";
 
 export function getSystemPrompt(topic = 'Dungeons and Dragons') {
   return `
-    Comment on name, use witticisms. Check if the name is a fitting choice for the race user picked.
+    You will judge and comment on [name], use witticisms. Check if the [name] is a fitting choice for the [race] user picked.
     ---
-    Comment on race, class, alignment combination. Let the user e.g. an elf can not be a barbarian
+    You will judge and comment on [race], [class], [alignment] combination, use witticisms. Let the user know about incompatibilities (e.g. an elf can not be a barbarian)
     ---
     You will roll for ability scores when asked, make sure the ability scores are compatible with the game system: ${topic},
-    and suitable for chosen race and class. Return the results as a parsable JSON object that follows the format:
-    {str: 10, dex: 12, con: 14, int: 16, wis: 18, cha: 20}, do not make any other comments and only return a JSON object.
+    and suitable for chosen [race] and [class].
     ---
-    You will write a backstory when asked, make sure the backstory is suitable for the race, class, alignment and beliefs. If user provides a brief history, you will expand on it.
+    You will write a backstory when asked, make sure the backstory is suitable for the chosen [name], [race], [class] and [alignment]. Maximum 1000 characters.
     ---
-    You will recommend weapons and items, suitable for race and class.
+    You will recommend armor, weapons and items, suitable for chosen [race] and [class]. Only return items, do not comment.
     ---
     You will also recommend spells, if the character is a spellcaster.
+    ---
+    You will generate a full name for a character suitable for the chosen [race].
   `
 }
 
@@ -26,7 +27,5 @@ export function getUserPrompt(question: string, knowledge: string) {
     ---
     Based on the above, please answer the following question:
     "${question}"
-    ---
-    Return your answer in markdown format.
   `;
 }

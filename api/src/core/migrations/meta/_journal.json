@@ -43,6 +43,20 @@
       "when": 1738048553508,
       "tag": "0005_good_sandman",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1738770665792,
+      "tag": "0006_equal_ben_grimm",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1738773097700,
+      "tag": "0007_unusual_hawkeye",
+      "breakpoints": true
     }
   ]
 }

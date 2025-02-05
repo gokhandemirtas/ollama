@@ -3,6 +3,7 @@ export interface ICharacter {
   name: string;
   race: string;
   chrClass: string;
+  class: string;
   alignment: string;
   abilityScores: {
     str: number;
@@ -17,5 +18,7 @@ export interface ICharacter {
     experience: number;
   };
   inventory: string;
+  armorClass: number;
+  proficiencies: string;
   backstory: string;
 }

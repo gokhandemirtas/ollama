@@ -1,3 +1,3 @@
 .character-card {
-  @apply bg-slate-200 border-4 border-slate-200 h-64 shadow-md shadow-black rounded-sm transition duration-150 ease-out hover:ease-in w-48 hover:scale-105 cursor-pointer;
+  @apply bg-slate-200 border-4 border-slate-200 w-64 h-64 shadow-md shadow-black rounded-lg transition duration-150 ease-out hover:ease-in w-48 hover:scale-105 cursor-pointer;
 }

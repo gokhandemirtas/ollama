@@ -41,6 +41,15 @@ export default function characterDesignerRoutes(app: Application) {
     }
   });
 
+  app.post("/character", async (request, reply, next) => {
+    try {
+      const response = await CharacterController.createCharacter(request.body);
+      reply.type("application/json").status(200).send(response);
+    } catch (error) {
+      next(error);
+    }
+  });
+
   app.get("/characters", async (request, reply, next) => {
     try {
       const characters: any = await CharacterController.fetchCharacters();

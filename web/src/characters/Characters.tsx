@@ -11,18 +11,14 @@ export default function Characters() {
   const [characters, setCharacters] = useState<Array<ICharacter>>([]);
   const [selectedCharacter, setSelectedCharacter] = useState<ICharacter | null>(null);
 
-  function getCharacters(){
-    api.get(`${import.meta.env.VITE_BACKEND_URL}/characters`)
+  async function getCharacters(){
+    const chars = await api.get(`${import.meta.env.VITE_BACKEND_URL}/characters`)
       .then((res) => res.json() as Promise<Array<ICharacter>>)
-      .then((res) => {
-        console.log(res);
-        setCharacters(res);
-      });
+    setCharacters(chars);
   }
 
   function onDeletedHandler(characterId: number){
     setCharacters(characters.filter((char) => char.id !== characterId));
-
   }
 
   useEffect(() => {
@@ -32,7 +28,7 @@ export default function Characters() {
   return (
     <>
       <ErrorBoundary fallback={<ErrorBoundaryFallback errorText="Can not load characters"/>}>
-        <div className="h-full w-full flex flex-wrap justify-center items-center gap-8">
+        <div className="h-full w-full flex flex-wrap justify-center items-center gap-4">
           { characters.length === 0 && <p className="text-2xl text-gray-500 dark:text-gray-400">No characters found</p> }
           {
             characters.length > 0 &&

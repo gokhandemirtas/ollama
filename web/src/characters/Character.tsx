@@ -21,16 +21,16 @@ export default function Character({ character, onDeletedHandler, onSelectedHandl
   }
 
   useEffect(() => {
-    const portrait = getPortrait(character);
+    const portrait = getPortrait(character.race, character.class);
     setPortrait(portrait!);
-  }, [setPortrait]);
+  }, [character]);
 
   return (
     <div className="character-card relative" onClick={() => onSelectedHandler(character)}>
-      <img src={portrait} alt={`${character.race} ${character.class}`} className="w-full h-auto mx-auto" />
+      <img src={portrait} alt={`${character.race} ${character.chrClass}`} className="w-full h-auto mx-auto rounded-lg" />
       {character && (
         <div className="p-2">
-          <h2 className="text-sm/6 font-bold text-emerald-800">{character.name ?? 'No name'}</h2>
+          <h2 className="text-sm/6 font-bold text-emerald-800 truncate text-ellipsis max-w-fit">{character.name ?? 'No name'}</h2>
           <TrashIcon className="absolute right-2 top-48 tool-button size-4 text-black hover:text-teal-500 cursor-pointer" onClick={deleteChar}/>
           <p className="text-xs/6">
             Lvl {character.level?.level}, {character.race} {character.class}
