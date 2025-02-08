@@ -11,6 +11,11 @@ export default function Characters() {
   const [characters, setCharacters] = useState<Array<ICharacter>>([]);
   const [selectedCharacter, setSelectedCharacter] = useState<ICharacter | null>(null);
 
+  function handleOnSelect(character: ICharacter){
+    console.log(character);
+    setSelectedCharacter(character);
+  }
+
   async function getCharacters(){
     const chars = await api.get(`${import.meta.env.VITE_BACKEND_URL}/characters`)
       .then((res) => res.json() as Promise<Array<ICharacter>>)
@@ -35,11 +40,11 @@ export default function Characters() {
             characters.map((character, index) =>
               <Character key={index} character={character}
                 onDeletedHandler={onDeletedHandler}
-                onSelectedHandler={setSelectedCharacter}/>
+                onSelectedHandler={handleOnSelect}/>
             )
           }
         </div>
-        {selectedCharacter && <CharacterSheet character={selectedCharacter} />}
+        <CharacterSheet character={selectedCharacter!} />
       </ErrorBoundary>
     </>
   );

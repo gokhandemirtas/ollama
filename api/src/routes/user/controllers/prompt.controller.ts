@@ -1,6 +1,6 @@
 import { embedder, getChatHistory, getKnowledge } from "../../../core/controllers/common.controller";
-import { getSystemPrompt, getUserPrompt } from "../../../core/prompt-templates/prompt-templates.";
-import toolPicker, { RetrieveCharacters } from "../../../core/tools";
+import { getSystemPrompt, getUserPrompt } from "../../../core/prompt-templates/lore-templates.";
+import toolPicker, { RetrieveCharacters, RetrieveSingleCharacter } from "../../../core/tools";
 
 import getLLM from "../../../core/providers/llm.provider";
 import { log } from "../../../core/providers/logger.provider";
@@ -33,7 +33,7 @@ export async function promptController(userQuery: string, llmModel: string) {
 		const initialResponse = await llm.chat({
 			model: llmModel,
 			messages,
-			tools: [RetrieveCharacters],
+			tools: [RetrieveCharacters, RetrieveSingleCharacter],
 		});
 
     log.info(`[promptController] initialResponse took: ${Number(timer.seconds()).toFixed(2)} secs `);

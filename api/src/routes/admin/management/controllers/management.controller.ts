@@ -1,6 +1,7 @@
 import { Metadata } from "../../../../core/models/metadata";
 import { conversationSchema } from "../../../../core/schemas";
 import { db } from "../../../../core/providers/db.provider";
+import { embedder } from "../../../../core/controllers/common.controller";
 import getEmbedding from "../../../../core/providers/embedding.provider";
 import { knowledgeSchema } from "../../../../core/schemas/knowledge-schema";
 import { log } from "../../../../core/providers/logger.provider";
@@ -28,8 +29,7 @@ export async function updateKnowledge({
 	category: string;
 }) {
 	try {
-		const response = await getEmbedding(content);
-		const embedding = response.embedding;
+		const embedding = await embedder(content);
 
 		const inserted = await db.insert(knowledgeSchema).values({
 			metadata: metadatas,

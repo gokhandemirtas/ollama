@@ -6,5 +6,5 @@ export const knowledgeSchema = pgTable("knowledge", {
   content: text("content").notNull(),
   source: text("source").notNull(),
   category: text("category").notNull(),
-  embedding: vector("embedding", { dimensions: 768 })
+  embedding: vector("embedding", { dimensions: 384 })
 });

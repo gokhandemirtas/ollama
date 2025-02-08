@@ -19,15 +19,28 @@ export default function Conversation({conversation, onDeleteHandler, onMarkdownE
     ul(props) {
       return <ul className="flex flex-wrap gap-1 mt-1 mb-1">{ props.children }</ul>
     },
+    ol(props) {
+      return <ol className="!number-list">{ props.children }</ol>
+    },
     li(props) {
       const oneWord = String(props?.children).includes(' ') === false;
-      return <li>
+      return <li className="!ml-4 my-2 !list-item">
         { oneWord ?
           <button className="markdown-button" onClick={(e) => onMarkdownEvent(props.children)}>
           { props?.children }
-          </button> : props?.children
+          </button> :
+          <a className="underline hover:text-emerald-500 cursor-pointer"
+            onClick={(e) => onMarkdownEvent(props.children)}>
+            {props?.children}
+          </a>
         }
       </li>
+    },
+    a(props) {
+      console.log(props);
+      return <a className="text-teal-500 hover:underline cursor-pointer">
+        { props.children }
+      </a>
     }
   }
 

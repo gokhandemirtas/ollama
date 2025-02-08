@@ -1,6 +1,8 @@
 import { Alert, AlertActions, AlertDescription, AlertTitle } from './catalyst/alert'
 import { useEffect, useState } from 'react'
 
+import { Button } from '@headlessui/react';
+
 export default function HttpErrorHandler() {
   let [isOpen, setIsOpen] = useState(false);
 
@@ -23,15 +25,15 @@ export default function HttpErrorHandler() {
 
   return (
     <>
-      <Alert open={isOpen} onClose={setIsOpen} className="!bottom-4 !absolute">
+      <Alert open={isOpen} onClose={setIsOpen} className="!top-4 right-4 !p-4 !absolute border-2 border-red-500 bg-red-100 !bg-opacity-80">
         <AlertTitle>Error while processing your request</AlertTitle>
         <AlertDescription className="!text-xs/6">
           { errorText }
         </AlertDescription>
         <AlertActions>
-          <button onClick={() => setIsOpen(false)} className="cancel-button !text-white">
+          <Button onClick={() => setIsOpen(false)} className="text-white text-sm/6 px-2">
             Dismiss
-          </button>
+          </Button>
         </AlertActions>
       </Alert>
     </>

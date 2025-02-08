@@ -36,8 +36,8 @@ export async function embedder(userQuery: string) {
 		return Promise.reject("Embedding invalid");
 	}
 
-	if (embedding && embedding.length !== 768) {
-		log.error(`[embedder] Embedding dimensions does not match the schema`);
+	if (embedding &&  embedding.length !== 384) {
+		log.error(`[embedder] Dimension mismatch expected 384, got ${embedding.length}`);
 		return Promise.reject("Embedding dimensions does not match the schema");
 	}
   // log.info(`[embedder] Embedding: ${embedding.length} dimensions`);
@@ -46,7 +46,11 @@ export async function embedder(userQuery: string) {
 
 export async function getChatHistory() {
   try {
-    const chatHistory: any = await db.select().from(conversationSchema).where(eq(conversationSchema.role, "user")).orderBy(desc(conversationSchema.timestamp)).limit(500);
+    const chatHistory: any = await db.select()
+                              .from(conversationSchema)
+                              .where(eq(conversationSchema.role, "user"))
+                              .orderBy(desc(conversationSchema.timestamp))
+                              .limit(500);
     const flattenedChatHistory = chatHistory ? chatHistory.map((item: any) => `[${item?.role}] ${item?.content}`).join("\n") : "No previous conversation available.";
     return flattenedChatHistory
   } catch (error) {

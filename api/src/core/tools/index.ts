@@ -1,19 +1,13 @@
-import { createCharacter } from "./create-character.tool";
-import { retrieveCharacters } from "./retrieve-character.tool";
-import { saveCharacter } from "./save-character.tool";
+import { retrieveCharacters, retrieveSingleCharacter } from "./retrieve-character.tool";
 
 export * from "./retrieve-character.tool";
-export * from "./create-character.tool";
-export * from "./save-character.tool";
 
 export default function toolPicker(name: string): Function {
   switch (name) {
-    case "saveCharacter":
-      return saveCharacter;
-    case "createCharacter":
-      return createCharacter;
     case "retrieveCharacters":
       return retrieveCharacters;
+    case "retrieveSingleCharacter":
+        return retrieveSingleCharacter;
     default:
       return () => Promise.reject("Tool not found");
   }

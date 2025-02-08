@@ -1,38 +1,36 @@
 import { Field, Fieldset, Input } from "@headlessui/react";
+import { object, string } from "yup";
+import { useEffect, useState } from "react";
 
 import { ErrorBoundary } from "react-error-boundary";
 import { ErrorBoundaryFallback } from "../core/components/ErrorBoundaryFallback";
 import { Panel } from "../core/components/Panel";
 import { PhotoIcon } from "@heroicons/react/16/solid";
 import api from "../core/services/HttpClient";
-import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+
+interface IFile {
+  metadata: string;
+  category: string;
+}
 
 export default function FileUploader() {
   const [inProgress, setInProgress] = useState(false);
   const [file, setFile] = useState<File | null>(null);
   const [uploadState, setUploadState] = useState("");
-  const [formState, setFormState] = useState({
-    metadata: "",
-    category: "",
-  });
-  const [error, setError] = useState("");
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormState((prevState) => ({
-      ...prevState,
-      [name]: value,
-    }));
-  };
+  const { register, watch, formState: { errors }, reset } = useForm<IFile>({
+    resolver: yupResolver(object({
+      metadata: string().required("Metadata is required").min(3, "Metadata must be at least 3 characters").max(30, "Metadata must be at most 30 characters"),
+      category: string().required("Category is required").min(3, "Category must be at least 3 characters").max(30, "Category must be at most 30 characters"),
+    })),
+    mode: "onChange",
+  })
 
-  const resetForm = () => {
-    setFile(null);
-    setFormState({
-      metadata: "",
-      category: "",
-    });
-    setError('');
-  };
+  const formValues = watch();
+
+  const abortController = new AbortController();
 
   const fileSelected = (e?: React.ChangeEvent<HTMLInputElement>) => {
     if (e && e.target.files) {
@@ -44,31 +42,24 @@ export default function FileUploader() {
 
   const upload = (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (!file || formState.category === '' || formState.metadata === '') {
-      setError('Please populate the form');
-      return;
-    } else {
-      setError('');
-    }
-
     setInProgress(true);
     const multipart = new FormData();
 
     multipart.append("file", file!);
     multipart.append("name", file!.name);
-    multipart.append("metadata", formState.metadata);
-    multipart.append("category", formState.category);
+    multipart.append("metadata", formValues.metadata);
+    multipart.append("category", formValues.category);
     setUploadState(`Uploading file: ${file!.name}`);
 
     api.post(`${import.meta.env.VITE_BACKEND_URL}/upload`, {
       body: multipart,
       timeout: import.meta.env.VITE_TIMEOUT,
+      signal: abortController.signal,
     })
       .json()
       .then((res: any) => {
         setUploadState(`Uploaded successfully: ${file!.name}`);
-        resetForm();
+        reset();
       })
       .catch((err: any) => {
         setUploadState(`Could not upload: ${file!.name}`);
@@ -77,6 +68,12 @@ export default function FileUploader() {
         setInProgress(false);
       });
   };
+
+  useEffect(() => {
+    return () => {
+      abortController.abort();
+    };
+  }, []);
 
   return (
     <>
@@ -114,37 +111,29 @@ export default function FileUploader() {
           <Fieldset className="mb-2">
             <Field>
               <Input type="text"
-                maxLength={30} required
-                id="category"
-                name="category"
                 placeholder="Category"
-                onChange={handleInputChange}
-                className="input-override w-full !color-scheme:dark"
-                value={formState.category}/>
+                {...register("category")}
+                className="input-override w-full !color-scheme:dark"/>
+                {errors && errors.category ? <p className="error-text">{errors.category.message}</p> : null}
             </Field>
             <Field>
               <Input type="text"
                 maxLength={30} required
-                id="metadata"
-                name="metadata"
                 placeholder="Metadata"
-                onChange={handleInputChange}
-                className="input-override w-full !color-scheme:dark"
-                value={formState.metadata}/>
+                {...register("metadata")}
+                className="input-override w-full !color-scheme:dark"/>
+                {errors && errors.metadata ? <p className="error-text">{errors.metadata.message}</p> : null}
             </Field>
           </Fieldset>
-          { error &&
-            <div className="bg-red-500 p-1 px-2 mb-4 text-yellow-50 text-xs/6 rounded-lg">{ error }</div>
-          }
           <div className="flex justify-end">
-            <button type="button" className="cancel-button" disabled={inProgress} onClick={resetForm}>
+            <button type="button" className="cancel-button" disabled={inProgress} onClick={() => reset()}>
               Cancel
             </button>
             <button
               type="submit"
               className="primary-button ml-4"
               onClick={(e) => upload(e)}
-              disabled={inProgress}
+              disabled={inProgress || !file || (errors && Object.keys(errors).length > 0)}
             >
               Save
             </button>

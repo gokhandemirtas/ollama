@@ -58,7 +58,7 @@ export default function Conversations() {
   function onMarkdownEvent(content: string) {
     const query = `Tell me more about ${content}`;
     setQuery(query);
-    // submitQuery(null as any);
+    submitQuery({ preventDefault: () => {}} as React.FormEvent);
   }
 
   function onEnterHandler(e: React.KeyboardEvent) {
