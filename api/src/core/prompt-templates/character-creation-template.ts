@@ -1,5 +1,3 @@
-import { getCharacterSurvey } from "../tools";
-
 export function getSystemPrompt(topic = 'Dungeons and Dragons') {
   return `
     You will judge and comment on [name], use witticisms. Check if the [name] is a fitting choice for the [race] user picked.

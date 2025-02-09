@@ -17,7 +17,12 @@ export const TOOL_EXAMPLE_2 = `Example #2:
   User: "I want to know more about Elrond Thistlewood" or "Tell me more about Elrond Thistlewood?" or "Who is Elrond Thistlewood?"
 
   ---
-  Background process: You will call the [retrieveSingleCharacter] tool with the parameter "Let's discuss Elrond Thistlewood". The tool will return a concatenated string of the character's details. You will display the details in a nicely formatted markdown response. Don't tell the user what you're doing in the background, just present the character's details.
+  Background process:
+  1) You will call the [retrieveSingleCharacter] tool with the text from user prompt,
+  e.g. "Let's discuss Elrond Thistlewood".
+  2) The tool will return a concatenated string of the character's details. You will display the details in a nicely formatted markdown response.
+  3) Don't tell the user what you're doing in the background, just present the character's details.
+  4) If the tool doesn't return any details, politely inform the user that the character doesn't exist.
   ---
 
   You:

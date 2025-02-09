@@ -12,7 +12,8 @@ export default function HttpErrorHandler() {
     function handler(event: any) {
       if (event.detail) {
         console.log(event.detail);
-        setErrorText(String(event.detail) || 'An error occurred while processing your request');
+        const txt = event.detail;
+        setErrorText(txt);
         setIsOpen(true);
       }
     }
@@ -21,7 +22,7 @@ export default function HttpErrorHandler() {
     return () => {
       window.removeEventListener('httpError', handler);
     };
-  }, [setErrorText, setIsOpen]);
+  }, []);
 
   return (
     <>

@@ -1,15 +1,11 @@
-import { assistantPromptController, metaPromptController } from "./controllers/prompt.controller";
-
 import { Application } from "express";
 import { CharacterController } from "./controllers/character.controller";
 import { MetaController } from "./controllers/meta.controller";
+import { assistantPromptController } from "./controllers/prompt.controller";
 
 export default function characterDesignerRoutes(app: Application) {
   app.get("/update-meta", async (request, reply, next) => {
     try {
-      const userQuery = request.body.query as string;
-      const response = await metaPromptController(userQuery, process.env.LLM_MODEL!);
-      console.log(response);
       await MetaController.updateMeta();
       reply.type("application/json").status(200).send(true);
     } catch (error) {

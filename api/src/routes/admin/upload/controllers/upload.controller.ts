@@ -68,7 +68,6 @@ export async function handleFileUploadRequest(req: Request, res: Response, next:
     await Promise.all([
         ...await contents.map(async(content) => {
           const throttled = throttle(async() => {
-            console.log(req.aborted)
             return await updateKnowledge({content, metadatas, source, category});
           });
           return await throttled();

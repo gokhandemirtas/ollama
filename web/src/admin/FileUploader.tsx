@@ -133,7 +133,7 @@ export default function FileUploader() {
               type="submit"
               className="primary-button ml-4"
               onClick={(e) => upload(e)}
-              disabled={inProgress || !file || (errors && Object.keys(errors).length > 0)}
+              disabled={inProgress || !file || !formValues.metadata || !formValues.category}
             >
               Save
             </button>

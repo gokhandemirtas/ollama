@@ -26,7 +26,6 @@ const api = ky.create({
     ],
     beforeError: [
       error => {
-        dispatchHttpErrorEvent(error.message);
         dispatchProgressEvent(false);
         return error;
       }
