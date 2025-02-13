@@ -25,7 +25,6 @@ export default function characterDesignerRoutes(app: Application) {
   app.post("/assistant", async (request, reply, next) => {
     try {
       const userQuery = request.body.query as string;
-      console.log(userQuery);
       if (userQuery !== '') {
         const response = await assistantPromptController(userQuery, process.env.LLM_MODEL!);
         reply.type("application/json").status(200).send(response);

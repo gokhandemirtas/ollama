@@ -20,9 +20,13 @@ export default function Character({ character, onDeletedHandler, onSelectedHandl
     onDeletedHandler(character.id!);
   }
 
-  useEffect(() => {
-    const portrait = getPortrait(character.race, character.class);
+  async function getSetPortrait() {
+    const portrait = await getPortrait(character.race, character.class as any);
     setPortrait(portrait!);
+  }
+
+  useEffect(() => {
+    getSetPortrait();
   }, [character]);
 
   return (

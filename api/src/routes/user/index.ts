@@ -36,7 +36,7 @@ export default function userRoutes(app: Application) {
   app.get("/conversations", async (request, reply, next) => {
     try {
       const conversations: any = await ChatController.fetchConversations();
-      const sorted = conversations ? conversations.sort((a: IConversation, b: IConversation) => {
+      const sorted = conversations ? conversations?.sort((a: IConversation, b: IConversation) => {
         const first = String(a.timestamp).split('.')[0];
         const second = String(b.timestamp).split('.')[0];
         if (first=== second) {

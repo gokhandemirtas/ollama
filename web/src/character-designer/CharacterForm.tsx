@@ -1,5 +1,4 @@
 import { Button, Field, Input, Select, Textarea } from "@headlessui/react";
-import { SubmitHandler, useForm } from "react-hook-form"
 import { useEffect, useState } from "react";
 
 import { BeakerIcon } from "@heroicons/react/24/solid";
@@ -9,7 +8,9 @@ import { ICharacter } from "../core/models/character";
 import api from "../core/services/HttpClient";
 import { characterSchema } from "./character-schema";
 import { getPortrait } from "../core/utils/portrait-picker";
+import { speak } from "../core/utils/speech";
 import useCharacterMetaStore from "../core/store/character-meta.store";
+import { useForm } from "react-hook-form"
 import { yupResolver } from "@hookform/resolvers/yup";
 
 export default function CharacterForm({ onPortraitChangeHandler, onNewSuggestion, character }: {
@@ -21,7 +22,7 @@ export default function CharacterForm({ onPortraitChangeHandler, onNewSuggestion
   const [inProgress, setInProgress] = useState(false);
   const { classes, races, alignments } = useCharacterMetaStore();
   const [assistantError, setAssistantError] = useState<string>();
-  const { register, watch, formState: { errors }, reset, setValue } = useForm<ICharacter>({
+  const { register, watch, formState: { errors, isValid }, reset, setValue } = useForm<ICharacter>({
     resolver: yupResolver(characterSchema),
     mode: "onChange",
   })
@@ -63,6 +64,7 @@ export default function CharacterForm({ onPortraitChangeHandler, onNewSuggestion
       })
       .finally(() => {
         setInProgress(false);
+        speak('I am done with the task');
       });
 
   }
@@ -80,7 +82,7 @@ export default function CharacterForm({ onPortraitChangeHandler, onNewSuggestion
     setInProgress(true);
     if(query) {
       askAssistant(
-        `My character is, ${query} .Please generate an inventory for me. Only return a comma seperated list of items.`,
+        `My character is, ${query} .Please generate an inventory for me.`,
         (res) => {
           const strip = res.replace(/["']/g, '');
           setValue('inventory', strip);
@@ -94,7 +96,7 @@ export default function CharacterForm({ onPortraitChangeHandler, onNewSuggestion
     setInProgress(true);
     if(query) {
       askAssistant(
-        `My character is, ${query} .Please generate a list of proficiencies. Only return a comma seperated list of items.`,
+        `My character is, ${query} .Please generate a list of proficiencies for me.`,
         (res) => {
           const strip = res.replace(/["']/g, '');
           setValue('proficiencies', strip);
@@ -108,7 +110,7 @@ export default function CharacterForm({ onPortraitChangeHandler, onNewSuggestion
     setInProgress(true);
     if(query) {
       askAssistant(
-        `My character is, ${query} .Please generate a backstory under 1000 characters for me.`,
+        `My character is, ${query} .Please generate a backstory for me.`,
         (res) => {
           const strip = res.replace(/["']/g, '');
           console.log(strip.length)
@@ -119,7 +121,7 @@ export default function CharacterForm({ onPortraitChangeHandler, onNewSuggestion
   }
 
   function generateName() {
-    askAssistant(`My character is a ${formValues.race}, please generate a full name (e.g. Galadriel Nightbringer) for me. Only return the name itself as a string`, (res) => {
+    askAssistant(`My character is a ${formValues.race}, please generate a full name for me.`, (res) => {
       const strip = res.replace(/["']/g, '');
       setValue('name', strip);
     })
@@ -128,14 +130,11 @@ export default function CharacterForm({ onPortraitChangeHandler, onNewSuggestion
   function roll() {
     const query = getSummary(['race', 'chrClass']);
     askAssistant(
-      `My character is ${query} ${formValues.chrClass}. Please roll my ability scores.
-      Do not make any comments only return JSON.
-      Return the results only as a parsable JSON object in this shape:
-      {str: number, dex: number, con: number, int: number, wis: number, cha: number}, `,
+      `My character is ${query}. Please roll my ability scores.`,
       (res) => {
         try {
           const scores = JSON.parse(res);
-          console.log(scores);
+
           Object.keys(scores).forEach(key => {
             setValue(`abilityScores[${key}]` as any, scores[key]);
           });
@@ -148,7 +147,7 @@ export default function CharacterForm({ onPortraitChangeHandler, onNewSuggestion
   function analyze() {
     const query = getSummary(['name', 'race', 'chrClass', 'alignment']);
     if(query) {
-      askAssistant(`My character is ${query} Please comment on it for me. Return response in markdown format`);
+      askAssistant(`My character is ${query} .Please analyze and comment on it for me.`);
     }
   }
 
@@ -159,6 +158,7 @@ export default function CharacterForm({ onPortraitChangeHandler, onNewSuggestion
   function resetForm() {
     reset();
     onNewSuggestion('');
+    onPortraitChangeHandler('');
   };
 
   async function onSubmit() {
@@ -364,7 +364,7 @@ export default function CharacterForm({ onPortraitChangeHandler, onNewSuggestion
             )}>
               Roll
             </Button>
-            <Button className="primary-button ml-2" type="button" disabled={inProgress} onClick={onSubmit}>
+            <Button className="primary-button ml-2" type="button" disabled={inProgress || (!isValid)} onClick={onSubmit}>
               Create
             </Button>
           </nav>

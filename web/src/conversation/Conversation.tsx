@@ -8,6 +8,7 @@ import { TrashIcon } from "@heroicons/react/24/solid";
 import { UserCircleIcon } from "@heroicons/react/24/solid";
 import api from "../core/services/HttpClient";
 import { formatTime } from "../core/utils/timestamper";
+import { speak } from "../core/utils/speech";
 
 export default function Conversation({conversation, onDeleteHandler, onMarkdownEvent }: {
   conversation: IConversation;
@@ -17,27 +18,20 @@ export default function Conversation({conversation, onDeleteHandler, onMarkdownE
 
   const components = {
     ul(props) {
-      return <ul className="flex flex-wrap gap-1 mt-1 mb-1">{ props.children }</ul>
+      return <ul className="!number-list">{ props.children }</ul>
     },
     ol(props) {
       return <ol className="!number-list">{ props.children }</ol>
     },
     li(props) {
-      const oneWord = String(props?.children).includes(' ') === false;
       return <li className="!ml-4 my-2 !list-item">
-        { oneWord ?
-          <button className="markdown-button" onClick={(e) => onMarkdownEvent(props.children)}>
-          { props?.children }
-          </button> :
-          <a className="underline hover:text-emerald-500 cursor-pointer"
-            onClick={(e) => onMarkdownEvent(props.children)}>
-            {props?.children}
-          </a>
-        }
+        <a className="underline hover:text-emerald-500 cursor-pointer"
+          onClick={(e) => onMarkdownEvent(props.children)}>
+          {props?.children}
+        </a>
       </li>
     },
     a(props) {
-      console.log(props);
       return <a className="text-teal-500 hover:underline cursor-pointer">
         { props.children }
       </a>
@@ -55,16 +49,6 @@ export default function Conversation({conversation, onDeleteHandler, onMarkdownE
         conversation.isSoftDeleted = true;
         onDeleteHandler(conversation.id);
       });
-  }
-
-  function speak(content: string) {
-    const synth = window.speechSynthesis;
-    if (!synth) return;
-    if (synth.speaking) {
-      synth.cancel();
-    }
-    const utterance = new SpeechSynthesisUtterance(content);
-    synth.speak(utterance);
   }
 
   function getClass() {

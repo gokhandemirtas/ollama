@@ -1,4 +1,4 @@
-import { Dialog, DialogActions, DialogBody, DialogTitle } from "../core/components/catalyst/dialog";
+import { Dialog, DialogActions, DialogBody } from "../core/components/catalyst/dialog";
 import { useEffect, useState } from "react";
 
 import { Button } from "@headlessui/react";
@@ -13,11 +13,15 @@ export default function CharacterSheet({ character }: {
   const [dialogOpen, setDialogOpen] = useState<boolean>(false);
   const [portrait, setPortrait] = useState<string>('');
 
+  async function getSetPortrait() {
+    const portrait = await getPortrait(character.race, character.class as any);
+    setPortrait(portrait!);
+  }
+
   useEffect(() => {
     if (character) {
       setDialogOpen(true);
-      const port = getPortrait(character.race, character.class);
-      setPortrait(port!);
+      getSetPortrait();
     }
   }, [character]);
 
@@ -26,10 +30,10 @@ export default function CharacterSheet({ character }: {
       <Dialog
         open={dialogOpen} onClose={() => setDialogOpen(false)}
         className="fixed !inset-0 !bg-none !bg-opacity-0 p-0 z-50 !rounded-none mx-auto !md:max-w-xl !lg:max-w-xl !xl:max-w-xl">
-        <div className="bg-white p-4 overflow-y-auto mx-auto mt-6">
+        <div className="bg-white p-4 mx-auto mt-6">
           <DialogBody className="mt-0">
           <h1 className="text-xl font-bold mb-4 text-emerald-800">{character?.name}</h1>
-            <aside className="text-xs/6 leading-snug">
+            <aside className="text-xs/6 leading-snug !overflow-y-auto !scrollbar-none">
               <section className="flex mb-8">
                 <img src={portrait} className="flex w-48 rounded-xl mr-8"/>
                 <div className="flex-auto leading-relaxed">
@@ -54,11 +58,11 @@ export default function CharacterSheet({ character }: {
                 <Markdown>{character?.backstory}</Markdown>
               </div>
               <p><span className="font-bold text-emerald-700">Inventory:</span></p>
-              <div className="overflow-y-auto h-48 mb-4">
+              <div className="overflow-y-auto h-16 mb-4">
                 <Markdown>{character?.inventory}</Markdown>
               </div>
               <p><span className="font-bold text-emerald-700">Proficiencies:</span></p>
-              <div className="overflow-y-auto h-48">
+              <div className="overflow-y-auto h-16">
                 <Markdown>{character?.proficiencies}</Markdown>
               </div>
 

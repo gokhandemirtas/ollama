@@ -8,6 +8,7 @@ import HttpErrorHandler from './core/components/HttpErrorAlert';
 import { Layout } from './core/components/Layout';
 import ProgressBar from './core/components/ProgressBar';
 import { Uploads } from './admin/Uploads';
+import useAuthStore from './core/store/auth.store';
 import useCharacterMetaStore from './core/store/character-meta.store';
 import { useEffect } from 'react';
 import useHealthCheckStore from './core/store/health-check.store';
@@ -15,11 +16,14 @@ import useHealthCheckStore from './core/store/health-check.store';
 export default function App() {
   const { fetchHealthCheckResults } = useHealthCheckStore();
   const { fetchCharacterMeta } = useCharacterMetaStore();
+  const { login, user } = useAuthStore();
 
   useEffect(() => {
     fetchHealthCheckResults();
     fetchCharacterMeta();
-  }, [fetchHealthCheckResults, fetchCharacterMeta]);
+    login();
+    console.log(user)
+  }, [user]);
 
   return (
     <>

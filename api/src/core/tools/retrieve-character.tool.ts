@@ -1,9 +1,20 @@
 import { like, or } from "drizzle-orm";
 
+import { ICharacter } from "../models/character";
 import { Tool } from "ollama";
 import { characterSchema } from "../schemas";
 import { db } from "../providers/db.provider";
 import { log } from "../providers/logger.provider";
+
+function flattenChar(char: ICharacter) {
+  return `
+    Name: ${char.name}, Race: ${char.race}, Class: ${char.class}, Alignment: ${char.alignment}, Armor Class: ${char.armorClass} \n
+    Backstory: ${char.backstory}\n
+    Inventory: ${char.inventory}\n
+    Proficiencies: ${char.proficiencies}\n
+    Ability Scores: ${JSON.stringify(char.abilityScores)} \n
+  `;
+}
 
 export async function retrieveCharacters() {
   try {
@@ -18,20 +29,31 @@ export async function retrieveCharacters() {
   }
 }
 
-export async function retrieveSingleCharacter(desc: string) {
+export async function retrieveSingleCharacter({desc}: { desc: string}) {
   try {
-    const character = await db.select().from(characterSchema)
+    const [name, raceClass] = desc.split(", ");
+    const [race, charClass] = raceClass.split("/");
+    const character = await db.select({
+        name: characterSchema.name,
+        race: characterSchema.race,
+        class: characterSchema.class,
+        alignment: characterSchema.alignment,
+        backstory: characterSchema.backstory,
+        inventory: characterSchema.inventory,
+        proficiencies: characterSchema.proficiencies,
+        abilityScores: characterSchema.abilityScores,
+        armorClass: characterSchema.armorClass,
+      })
+      .from(characterSchema)
       .where(
         or(
-          like(characterSchema.name, `%${desc}%`),
-          like(characterSchema.race, `%${desc}%`),
-          like(characterSchema.class, `%${desc}%`)
+          like(characterSchema.name, `%${name}%`),
+          like(characterSchema.race, `%${race}%`),
+          like(characterSchema.class, `%${charClass}%`)
         )
-      )
+      ).limit(1);
 
-    log.info(`[retrieveSingleCharacter] ${JSON.stringify(character)}`);
-    const flat = Object.keys(character)
-      .map((key: any) => `${key}: ${character[key]}`).join("\n");
+    const flat = character ? flattenChar(character[0] as any) : null;
     return Promise.resolve(flat);
   } catch (error) {
     log.error(`[retrieveSingleCharacter] ${error}`);

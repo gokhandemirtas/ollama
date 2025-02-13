@@ -1,18 +1,19 @@
-import { ArrowRightStartOnRectangleIcon, ChevronDownIcon, ChevronUpIcon, Cog8ToothIcon, HomeIcon, InboxIcon, LightBulbIcon, MagnifyingGlassIcon, PlusIcon, QuestionMarkCircleIcon, ShieldCheckIcon, SparklesIcon, Square2StackIcon, StarIcon, TicketIcon, UserIcon } from "@heroicons/react/16/solid";
-import { Dropdown, DropdownButton, DropdownDivider, DropdownItem, DropdownLabel, DropdownMenu } from "./catalyst/dropdown";
+import { ArrowRightStartOnRectangleIcon, ChevronDownIcon, ChevronUpIcon, MagnifyingGlassIcon, SparklesIcon, Square2StackIcon, TicketIcon } from "@heroicons/react/16/solid";
+import { Dropdown, DropdownButton, DropdownItem, DropdownLabel, DropdownMenu } from "./catalyst/dropdown";
 import { Sidebar, SidebarBody, SidebarFooter, SidebarHeader, SidebarItem, SidebarLabel, SidebarSection, SidebarSpacer } from "./catalyst/sidebar";
 
 import { Avatar } from "./catalyst/avatar";
 import { BeakerIcon } from "@heroicons/react/24/solid";
 import { CircleStackIcon } from "@heroicons/react/24/solid";
-import { CursorArrowRaysIcon } from "@heroicons/react/24/solid";
 import Logo from '../../assets/logo.png';
 import MyAvatar from '../../assets/avatars/avatar1.png';
 import { VariableIcon } from "@heroicons/react/24/solid";
+import useAuthStore from "../store/auth.store";
 import useHealthCheckStore from "../store/health-check.store";
 
 export default function XpSideBar() {
   const { healthCheckResults } = useHealthCheckStore();
+  const { user, logout } = useAuthStore();
   return (
     <Sidebar>
       <SidebarHeader>
@@ -85,16 +86,18 @@ export default function XpSideBar() {
             <span className="flex min-w-0 items-center gap-3">
               <Avatar src={MyAvatar} className="size-10" square alt="" />
               <span className="min-w-0">
-                <span className="block truncate text-sm/5 font-medium text-zinc-950 dark:text-white">Erica</span>
+                <span className="block truncate text-sm/5 font-medium text-zinc-950 dark:text-white">
+                  {user?.displayName}
+                </span>
                 <span className="block truncate text-xs/5 font-normal text-zinc-500 dark:text-zinc-400">
-                  erica@example.com
+                  { user?.email }
                 </span>
               </span>
             </span>
             <ChevronUpIcon />
           </DropdownButton>
           <DropdownMenu className="min-w-64" anchor="top start">
-            <DropdownItem href="/logout">
+            <DropdownItem onClick={logout}>
               <ArrowRightStartOnRectangleIcon />
               <DropdownLabel>Sign out</DropdownLabel>
             </DropdownItem>

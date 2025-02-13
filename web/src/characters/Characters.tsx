@@ -5,6 +5,7 @@ import CharacterSheet from "./CharacterSheet";
 import { ErrorBoundary } from "react-error-boundary";
 import { ErrorBoundaryFallback } from "../core/components/ErrorBoundaryFallback";
 import { ICharacter } from "../core/models/character";
+import { PlusCircleIcon } from "@heroicons/react/24/solid";
 import api from "../core/services/HttpClient";
 
 export default function Characters() {
@@ -43,6 +44,11 @@ export default function Characters() {
                 onSelectedHandler={handleOnSelect}/>
             )
           }
+          <div className="character-card flex justify-center items-center">
+            <a href="/designer">
+            <PlusCircleIcon className="size-24 text-gray-400 hover:text-emerald-500"/>
+            </a>
+          </div>
         </div>
         <CharacterSheet character={selectedCharacter!} />
       </ErrorBoundary>

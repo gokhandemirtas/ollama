@@ -16,6 +16,6 @@ export default function ProgressBar() {
     };
   }, []);
   return (
-    <aside className={`!border-3 fixed z-top top-0 left-0 w-full ${inProgress ? 'in-progress' : ''}`}></aside>
+    <aside className={`${inProgress ? 'in-progress' : ''}`}></aside>
   );
 }

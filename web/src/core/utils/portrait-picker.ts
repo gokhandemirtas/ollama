@@ -1,14 +1,12 @@
-import { ICharacter } from "../models/character";
+import { getStorageRef } from "../services/Firebase";
 
-const portraits = import.meta.glob('../../assets/portraits/*.png', { eager: true });
-
-export function getPortrait(race: string, chrClass: string): string {
+export function getPortrait(race: string, chrClass: string): Promise<string> {
   try {
     const charRace = String(race).toLowerCase();
     const charClass = String(chrClass).toLowerCase();
-    const portraitKey = `../../assets/portraits/${charRace}-${charClass}.png`;
-    return (portraits[portraitKey] as { default: string })?.default ?? (portraits['../../assets/portraits/no-portrait.png'] as { default: string }).default;
+    return getStorageRef(`${charRace}-${charClass}.png`)
+
   } catch (error) {
-    return (portraits['../../assets/portraits/no-portrait.png'] as { default: string }).default;
+    return Promise.reject(error);
   }
 }

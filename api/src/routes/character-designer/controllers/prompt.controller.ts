@@ -15,12 +15,12 @@ export async function assistantPromptController(userQuery: string, llmModel: str
     return Promise.reject(`${llmModel} is not found`);
   }
 
-  log.info(`[assistantPromptController] started preparing response`);
+  log.info(`[assistantPromptController] started preparing response with ${llmModel}`);
 
 	try {
     const timer = timeSpan();
 		const embedding = await embedder(userQuery);
-		const flattenedKnowledge = await getKnowledge(embedding, null, 5);
+		const flattenedKnowledge = await getKnowledge(embedding, null, 1);
 		const userPrompt = getUserPrompt(userQuery, flattenedKnowledge);
 
 		const messages = [

@@ -1,24 +1,21 @@
-@property --bg-angle {
-  inherits: false;
+@property --angle {
+  syntax: '<angle>';
   initial-value: 0deg;
-  syntax: "<angle>";
+  inherits: false;
 }
 
-@keyframes spin {
+@keyframes rotate {
   to {
-    --bg-angle: 360deg;
+    --angle: 360deg;
   }
 }
 
 .in-progress {
-  animation: spin 2.5s infinite linear;
-  background:
-  conic-gradient(
-    from var(--bg-angle) in oklch longer hue,
-    oklch(0.85 0.37 0) 0 0
-  )
-  border-box;
-  background-origin: border-box;
-  background-color: white !important;
-  border: 4px solid transparent;
+  --angle: 0deg;
+  border: 3px solid;
+  width: calc(100% - 8px);
+  pointer-events: none;
+  border-image: conic-gradient(from var(--angle), rgb(48, 17, 17), red, rgb(140, 14, 14), rgb(27, 27, 27), rgb(255, 85, 0), rgb(208, 27, 27), rgb(63, 63, 63), red) 1;
+  animation: 5s rotate linear infinite;
+  @apply fixed z-10 top-0 left-2 h-full !rounded-xl;
 }

@@ -66,7 +66,6 @@ export async function promptController(userQuery: string, llmModel: string) {
 
 		await updateChatHistory("assistant", finalResponse.message.content);
 		await updateChatHistory("user", userQuery ?? "No previous questions.");
-
 		return Promise.resolve(finalResponse);
 	} catch (error) {
 		return Promise.reject(error);
