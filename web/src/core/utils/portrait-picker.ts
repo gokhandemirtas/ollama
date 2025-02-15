@@ -1,6 +1,6 @@
 import { getStorageRef } from "../services/Firebase";
 
-export function getPortrait(race: string, chrClass: string): Promise<string> {
+export function resolvePortrait(race: string, chrClass: string): Promise<string> {
   try {
     const charRace = String(race).toLowerCase();
     const charClass = String(chrClass).toLowerCase();

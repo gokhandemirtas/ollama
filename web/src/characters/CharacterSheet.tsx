@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { Button } from "@headlessui/react";
 import { ICharacter } from "../core/models/character";
 import Markdown from "react-markdown";
-import { getPortrait } from "../core/utils/portrait-picker";
+import { resolvePortrait } from "../core/utils/portrait-picker";
 
 export default function CharacterSheet({ character }: {
   character: ICharacter;
@@ -14,7 +14,7 @@ export default function CharacterSheet({ character }: {
   const [portrait, setPortrait] = useState<string>('');
 
   async function getSetPortrait() {
-    const portrait = await getPortrait(character.race, character.class as any);
+    const portrait = await resolvePortrait(character.race, character.class as any);
     setPortrait(portrait!);
   }
 

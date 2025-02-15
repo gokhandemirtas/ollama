@@ -7,7 +7,7 @@ import { ErrorBoundaryFallback } from "../core/components/ErrorBoundaryFallback"
 import { ICharacter } from "../core/models/character";
 import api from "../core/services/HttpClient";
 import { characterSchema } from "./character-schema";
-import { getPortrait } from "../core/utils/portrait-picker";
+import { resolvePortrait } from "../core/utils/portrait-picker";
 import { speak } from "../core/utils/speech";
 import useCharacterMetaStore from "../core/store/character-meta.store";
 import { useForm } from "react-hook-form"
@@ -39,10 +39,14 @@ export default function CharacterForm({ onPortraitChangeHandler, onNewSuggestion
   const formValues = watch();
   const abortController = new AbortController();
 
+  async function getPortrait() {
+    const image = await resolvePortrait(formValues.race, formValues.chrClass);
+    onPortraitChangeHandler(image!);
+  }
+
   useEffect(() => {
     if (formValues.race && formValues.chrClass) {
-      const image = getPortrait(formValues.race, formValues.chrClass);
-      onPortraitChangeHandler(image!);
+      getPortrait();
     }
   }, [formValues.race, formValues.chrClass]);
 

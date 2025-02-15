@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 import { ICharacter } from "../core/models/character";
 import { TrashIcon } from '@heroicons/react/24/solid';
 import api from '../core/services/HttpClient';
-import { getPortrait } from '../core/utils/portrait-picker';
+import { resolvePortrait } from '../core/utils/portrait-picker';
 
 export default function Character({ character, onDeletedHandler, onSelectedHandler }: {
   character: ICharacter;
@@ -21,7 +21,7 @@ export default function Character({ character, onDeletedHandler, onSelectedHandl
   }
 
   async function getSetPortrait() {
-    const portrait = await getPortrait(character.race, character.class as any);
+    const portrait = await resolvePortrait(character.race, character.class as any);
     setPortrait(portrait!);
   }
 

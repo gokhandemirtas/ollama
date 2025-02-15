@@ -6,7 +6,6 @@ import { ErrorBoundaryFallback } from "../core/components/ErrorBoundaryFallback"
 import Markdown from "react-markdown";
 import { Panel } from "../core/components/Panel";
 import { SnarkBar } from "../core/components/SnarkBar";
-import { getPortrait } from "../core/utils/portrait-picker";
 import { getRandomGreeting } from "../core/services/Greeter";
 
 export default function CharacterDesigner() {
@@ -15,7 +14,6 @@ export default function CharacterDesigner() {
   const [portrait, setPortrait] = useState('');
 
   useEffect(() => {
-    const portrait = getPortrait('','');
     setPortrait(portrait!);
   }, [setPortrait]);
 
